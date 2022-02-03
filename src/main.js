@@ -337,7 +337,7 @@ const createDna = (_layers, layersList, max, min) => {
     }
   });
 
-  const randSort = [2, ...shuffle([3, 4, 5, 6, 7, 8, 9, 10])];
+  const randSort = [2, 3, ...shuffle([4, 5, 6, 7, 8, 9, 10])];
 
   randSort.forEach((index) => {
     let layer = layersList[index];
@@ -388,7 +388,7 @@ const createDna = (_layers, layersList, max, min) => {
         layer.bypassDNA ? "?bypassDNA=true" : ""
       }`;
   })
-  if(dnaArray[0].name === 'empty') {
+  if (dnaArray[0].name === 'empty') {
     return "";
   }
 
@@ -440,8 +440,8 @@ const addQuantityModifier = (layers, count) => {
 }
 
 const getTraitsIds = (count) => {
-  let traitsIds = [3, 4, 5, 6, 7, 8, 9];
-  let returnedTraitsIds = [2];
+  let traitsIds = [4, 5, 6, 7, 8, 9];
+  let returnedTraitsIds = [2, 3];
   for (let i = 0; i < count; i++) {
     const index = Math.floor(Math.random() * (traitsIds.length))
     returnedTraitsIds.push(...traitsIds.splice(index, 1))
@@ -582,7 +582,7 @@ const startCreating = async () => {
         editionCount++;
         abstractedIndexes.shift();
       } else {
-        if(newDna === '') {
+        if (newDna === '') {
           console.log("Not enough traits!");
         } else {
           console.log("DNA exists!");
