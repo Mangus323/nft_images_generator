@@ -388,6 +388,9 @@ const createDna = (_layers, layersList, max, min) => {
         layer.bypassDNA ? "?bypassDNA=true" : ""
       }`;
   })
+  if(dnaArray[0].name === 'empty') {
+    return "";
+  }
 
   if (dnaArray.length - 2 < min) {
     return "";
@@ -437,8 +440,8 @@ const addQuantityModifier = (layers, count) => {
 }
 
 const getTraitsIds = (count) => {
-  let traitsIds = [4, 5, 6, 7, 8, 9, 10, 11];
-  let returnedTraitsIds = [3];
+  let traitsIds = [3, 4, 5, 6, 7, 8, 9];
+  let returnedTraitsIds = [2];
   for (let i = 0; i < count; i++) {
     const index = Math.floor(Math.random() * (traitsIds.length))
     returnedTraitsIds.push(...traitsIds.splice(index, 1))
@@ -579,7 +582,11 @@ const startCreating = async () => {
         editionCount++;
         abstractedIndexes.shift();
       } else {
-        console.log("DNA exists!");
+        if(newDna === '') {
+          console.log("Not enough traits!");
+        } else {
+          console.log("DNA exists!");
+        }
         failedCount++;
         if (failedCount >= uniqueDnaTorrance) {
           console.log(
