@@ -175,7 +175,9 @@ const addAttributes = (_element) => {
   if (selectedElement.name === 'empty' && !(_element.layer.name.includes('Mouth'))) {
     name = "N/A";
   }
-
+  if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
+    name = "Brown";
+  }
   if (_element.layer.name.includes('Base')) {
     return;
   }

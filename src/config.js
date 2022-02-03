@@ -78,7 +78,7 @@ const layerConfigurations = [
   }, {
     count: 85,
     maxTraits: 5,
-    minTraits: 3,
+    minTraits: 4,
     layersOrder: [
       {name: "Background4"},
       {name: "Base"},
@@ -96,7 +96,6 @@ const layerConfigurations = [
     count: 130,
     maxTraits: 4,
     minTraits: 3,
-    maxWeight: 700,
     layersOrder: [
       {name: "Background5"},
       {name: "Base"},
@@ -113,7 +112,7 @@ const layerConfigurations = [
   }, {
     count: 165,
     maxTraits: 4,
-    minTraits: 2,
+    minTraits: 3,
     layersOrder: [
       {name: "Background6"},
       {name: "Base"},
