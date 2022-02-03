@@ -25,7 +25,7 @@ const layerConfigurations = [
   {
     count: 10,
     maxTraits: 8,
-    minTraits: 6,
+    minTraits: 5,
     layersOrder: [
       {name: "Background1"},
       {name: "Base"},
@@ -43,7 +43,7 @@ const layerConfigurations = [
   {
     count: 25,
     maxTraits: 6,
-    minTraits: 4,
+    minTraits: 5,
     layersOrder: [
       {name: "Background2"},
       {name: "Base"},
@@ -60,7 +60,7 @@ const layerConfigurations = [
   },
   {
     count: 50,
-    maxTraits: 6,
+    maxTraits: 5,
     minTraits: 4,
     layersOrder: [
       {name: "Background3"},
@@ -95,7 +95,7 @@ const layerConfigurations = [
   }, {
     count: 130,
     maxTraits: 4,
-    minTraits: 3,
+    minTraits: 4,
     layersOrder: [
       {name: "Background5"},
       {name: "Base"},

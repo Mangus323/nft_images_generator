@@ -22,6 +22,9 @@ const getScore = (trait_type, name) => {
       }
     }
   }
+  if (trait_type === 'Background') {
+    return (totalCount * (Math.sqrt(111)) / traitCount).toFixed(2);
+  }
   return (totalCount / traitCount).toFixed(2);
 }
 
@@ -69,7 +72,7 @@ let rows = rawData.map((row, count) => {
   totalScore += +traitsCountScore;
   returnString += `${traitCount}${separator}${traitsCountScore}${separator}`
 
-  row.attributes.forEach((item, index, array) => {
+  row.attributes.forEach((item) => {
     let score = getScore(item.trait_type, item.name);
     totalScore += +score
     returnString += `${item.name}${separator}${score}${separator}`

@@ -390,7 +390,7 @@ const createDna = (_layers, layersList, max, min) => {
         layer.bypassDNA ? "?bypassDNA=true" : ""
       }`;
   })
-  if (dnaArray[0].name === 'empty') {
+  if (dnaArray[1].name === 'empty') {
     return "";
   }
 
