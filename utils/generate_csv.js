@@ -80,7 +80,7 @@ let rows = rawData.map((row, count) => {
 }).join("\n")
 csv += rows;
 
-console.log(sumTrait)
+console.log("sum traits: " + sumTrait);
 
-// fs.writeFileSync("./csv/list.csv", csv)
+fs.writeFileSync("./csv/list.csv", csv);
 
