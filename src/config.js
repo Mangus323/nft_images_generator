@@ -25,7 +25,7 @@ const layerConfigurations = [
   {
     count: 10,
     maxTraits: 8,
-    minTraits: 5,
+    minTraits: 6,
     layersOrder: [
       {name: "Background1"},
       {name: "Base"},
