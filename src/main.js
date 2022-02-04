@@ -361,6 +361,9 @@ const createDna = (_layers, layersList, max, min) => {
         }
       }
     )
+    if (index === 2 && layer.elements.length < 800) {
+      console.log('ttu');
+    }
     if (traitsIds.includes(index) && excludedLayer.length === 0) {
       traitsIds = changeTraitId(traitsIds, index);
     }
@@ -368,7 +371,7 @@ const createDna = (_layers, layersList, max, min) => {
     for (let i = 0; i < excludedLayer.length; i++) {
       const name = excludedLayer[i].filename.split('#')[0];
       if (!blockedTraits.includes(name)) {
-        const layersListIndex = excludedLayerIndexes[0];
+        const layersListIndex = excludedLayerIndexes[i];
         blockedTraits.push(...getExcludes(name));
 
         remove.push({
@@ -376,9 +379,9 @@ const createDna = (_layers, layersList, max, min) => {
           itemIndex: layersListIndex
         });
 
-        dnaArray.push(excludedLayer[0]);
+        dnaArray.push(excludedLayer[i]);
         randNum[index] =
-          `${excludedLayer[0].id}:${excludedLayer[0].filename}${
+          `${excludedLayer[i].id}:${excludedLayer[i].filename}${
             layer.bypassDNA ? "?bypassDNA=true" : ""
           }`;
         return;
@@ -390,7 +393,7 @@ const createDna = (_layers, layersList, max, min) => {
         layer.bypassDNA ? "?bypassDNA=true" : ""
       }`;
   })
-  if (dnaArray[1].name === 'empty') {
+  if (!dnaArray[1].path.includes('Clothes')) {
     return "";
   }
 
@@ -489,7 +492,8 @@ const startCreating = async () => {
     let sortedGroup = []
     newLayer.elements = [];
 
-    const stepPercentage = Math.floor(layer.elements.length / 3)
+    let stepPercentage = Math.floor(layer.elements.length / 3)
+    if (stepPercentage > 10) stepPercentage = 10
     const steps = [stepPercentage, stepPercentage, layer.elements.length - (stepPercentage) * 2, 0];
     let step = steps[0]
     let stepIndex = 0;
@@ -588,8 +592,8 @@ const startCreating = async () => {
           console.log("Not enough traits!");
         } else {
           console.log("DNA exists!");
+          failedCount++;
         }
-        failedCount++;
         if (failedCount >= uniqueDnaTorrance) {
           console.log(
             `You need more layers or elements to grow your edition to ${layerConfigurations[layerConfigIndex].count} artworks!`

@@ -23,9 +23,36 @@ const getScore = (trait_type, name) => {
     }
   }
   if (trait_type === 'Background') {
-    return (totalCount * (Math.sqrt(111)) / traitCount).toFixed(2);
+    let backgroundModifier = 0;
+    switch (name) {
+      case "Gold":
+        backgroundModifier = 500;
+        break;
+      case "Red":
+        backgroundModifier = 475;
+        break;
+      case "Blue":
+        backgroundModifier = 425;
+        break;
+      case "Pink":
+        backgroundModifier = 400;
+        break;
+      case "Purple":
+        backgroundModifier = 350;
+        break;
+      case "Green":
+        backgroundModifier = 200;
+        break;
+      case "Aqua":
+        backgroundModifier = 100;
+        break;
+      case "Grey":
+        backgroundModifier = 0;
+        break;
+    }
+    return (backgroundModifier + totalCount * (Math.sqrt(111)) / traitCount).toFixed(2);
   }
-  return (totalCount / traitCount).toFixed(2);
+  return ((totalCount / (traitCount + 3)) / 1.25).toFixed(2);
 }
 
 const getTraitsCountScore = (count) => {
@@ -74,8 +101,8 @@ let rows = rawData.map((row, count) => {
 
   row.attributes.forEach((item) => {
     let score = getScore(item.trait_type, item.name);
-    totalScore += +score
-    returnString += `${item.name}${separator}${score}${separator}`
+    totalScore += +score;
+    returnString += `${item.name}${separator}${score}${separator}`;
   })
   sumTrait += traitCount
   returnString += totalScore.toFixed(2);
