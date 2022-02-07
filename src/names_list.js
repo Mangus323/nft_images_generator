@@ -21,6 +21,7 @@ const names_list = {
   t7: "Grey",
   t8: "Brown",
   t166: "Dark brown",
+  t333: "Pink",
   // Clothes
   t13: "Jedi cape",
   t16: "Robot claws",
@@ -181,6 +182,23 @@ const names_list = {
   t114: "Sleepy",
   t110: "Bloodshot",
   t113: "Black hypnotised",
+  // new
+  t408: "Dress",
+  t402: "Arrow quiver",
+  t405: "Lab jacket",
+  t410: "Leaves",
+  t401: "Dog tags",
+  t406: "Safari shirt",
+  t409: "Camouflage t-shirt",
+  t411: "Tanktop",
+  t407: "Neckerchief",
+  t404: "Caveman pelt",
+  t403: "Claw mark t-shirt",
+
+  t655: "Bamboo hat",
+  t654: "Safari hat",
+  t656: "Bone",
+
 }
 
 const getTraitName = (name) => {

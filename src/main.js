@@ -361,9 +361,6 @@ const createDna = (_layers, layersList, max, min) => {
         }
       }
     )
-    if (index === 2 && layer.elements.length < 800) {
-      console.log('ttu');
-    }
     if (traitsIds.includes(index) && excludedLayer.length === 0) {
       traitsIds = changeTraitId(traitsIds, index);
     }
@@ -558,8 +555,27 @@ const startCreating = async () => {
 
         let loadedElements = [];
 
+        if (results[8].selectedElement.name === 't104') {
+          // change layer order
+          const changeableArrayOrder = [
+            't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
+            't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
+          const isChangeOrder = changeableArrayOrder.find((item) => {
+            return item === results[10].selectedElement.name;
+          })
+
+          if (isChangeOrder) {
+            console.log('Changing order!');
+            const cloneEars = JSON.parse(JSON.stringify(results[8]));
+            results[8] = null;
+            results.push(cloneEars);
+          }
+        }
+
         results.forEach((layer) => {
-          loadedElements.push(loadLayerImg(layer));
+          if (layer) {
+            loadedElements.push(loadLayerImg(layer));
+          }
         });
 
         await Promise.all(loadedElements).then((renderObjectArray) => {
@@ -589,7 +605,7 @@ const startCreating = async () => {
         abstractedIndexes.shift();
       } else {
         if (newDna === '') {
-          console.log("Not enough traits!");
+          console.log("Not enough traits, rebuild!");
         } else {
           console.log("DNA exists!");
           failedCount++;
