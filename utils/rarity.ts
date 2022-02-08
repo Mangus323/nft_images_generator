@@ -1,21 +1,23 @@
-const basePath = process.cwd();
-const fs = require("fs");
-const {getTraitByName} = require(`${basePath}/src/names_list.js`);
-const {getExcludes} = require(`${basePath}/src/exclude_list.js`);
-const separator = ";"
-let rawData = [];
+import { IJSONImage } from './types';
+import { getTraitByName } from '../src/names_list';
+import { getExcludes } from '../src/exclude_list';
 
-const getTraitImagesIndexes = (trait_type, name) => {
-  let returnValue = "";
+const basePath = process.cwd();
+const fs = require('fs');
+const separator = ';';
+let rawData: IJSONImage[] = [];
+
+const getTraitImagesIndexes = (trait_type: string, name: string) => {
+  let returnValue = '';
   rawData.forEach((row, index) => {
     row.attributes.forEach((item) => {
       if (item.trait_type === trait_type && item.name === name) {
         returnValue += `${index + 1},`;
       }
-    })
-  })
+    });
+  });
   return returnValue;
-}
+};
 
 const getRawData = () => {
   for (let i = 1; i <= 10000; i++) {
@@ -25,25 +27,25 @@ const getRawData = () => {
       return;
     }
   }
-}
+};
 
-const generateRarity = () => {
+export const generateRarity = () => {
   getRawData();
 
-  let traitList = {}
+  let traitList: any = {};
   let csv = '';
 
   rawData.forEach((row) => {
     row.attributes.forEach((item) => {
-      if (!traitList[item.trait_type]) traitList[item.trait_type] = {}
-      if (!traitList[item.trait_type][item.name]) traitList[item.trait_type][item.name] = 0
+      if (!traitList[item.trait_type]) traitList[item.trait_type] = {};
+      if (!traitList[item.trait_type][item.name]) traitList[item.trait_type][item.name] = 0;
 
       traitList[item.trait_type][item.name]++;
-    })
-  })
+    });
+  });
 
   for (const traitType in traitList) {
-    csv += `${traitType}${separator}Count${separator}id${separator}Excluded traits${separator}Images list id\n`
+    csv += `${traitType}${separator}Count${separator}id${separator}Excluded traits${separator}Images list id\n`;
 
     for (const traitTypeKey in traitList[traitType]) {
       let traitId = getTraitByName(traitTypeKey, traitType);
@@ -54,10 +56,6 @@ const generateRarity = () => {
     csv += '\n';
   }
 
-  fs.writeFileSync("./csv/rarity.csv", csv)
+  fs.writeFileSync('./build/csv/rarity.csv', csv);
 //fs.writeFileSync("./rarity.json", JSON.stringify(traitList, null, ' '))
-}
-
-module.exports = {
-  generateRarity
-}
+};

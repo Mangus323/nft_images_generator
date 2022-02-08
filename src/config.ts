@@ -147,6 +147,8 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   },
 ];
 
+const caching = true;
+
 const format = {
   width: 2048,
   height: 2048,
@@ -176,4 +178,5 @@ export {
   rarityDelimiter,
   extraMetadata,
   namePrefix,
+  caching
 };

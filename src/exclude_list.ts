@@ -110,9 +110,12 @@ const exclude_list: any = {
   t671: 't145',
   t654: 't59, t65',
   t655: 't59, t65',
-}
+};
 
-export const getExcludes = (name: string): string[] => {
+export const getExcludes = (name: string | undefined): string[] => {
+  if (!name) {
+    return [];
+  }
   if (exclude_list[name]) {
     return exclude_list[name].split(', ');
   }

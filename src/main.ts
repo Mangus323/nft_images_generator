@@ -1,9 +1,7 @@
 import { IDnaElement, IImage, ILayer, ILayerConfigurationItem, ILayerElement, IRemove } from '../utils/types';
 
-const basePath = process.cwd();
 const fs = require('fs');
-const sha1 = require(`${basePath}/node_modules/sha1`);
-const { createCanvas, loadImage } = require(`${basePath}/node_modules/canvas`);
+const basePath = process.cwd();
 const buildDir = `${basePath}/build`;
 const layersDir = `${basePath}/layers`;
 import {
@@ -16,19 +14,21 @@ import {
   rarityDelimiter,
   extraMetadata,
   namePrefix,
+  caching,
 } from './config';
 import { getExcludes } from './exclude_list';
 import { getTraitName } from './names_list';
 import shuffle from '../utils/shuffle';
-import { Image } from 'canvas';
+import { createCanvas, Image, loadImage } from 'canvas';
+import sha1 from 'sha1';
 
+const DNA_DELIMITER = '-';
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = format.smoothing;
 
 let metadataList: any[] = [];
 let attributesList: any[] = [];
-const DNA_DELIMITER = '-';
 let remove: IRemove[] = [];
 const emptyElements: any[] = [];
 
@@ -172,12 +172,18 @@ const loadLayerImg = async (dna: IDnaElement): Promise<IImage | null> => {
   try {
     return new Promise(async (resolve) => {
       const path = `${dna.selectedElement?.path}`;
-      let cacheItem = cache.get(path);
-      if (cacheItem) {
-        resolve({ layer: dna, loadedImage: cacheItem });
+
+      if (caching) {
+        let cacheItem = cache.get(path);
+        if (cacheItem) {
+          resolve({ layer: dna, loadedImage: cacheItem });
+        } else {
+          const image = await loadImage(`${dna.selectedElement?.path}`);
+          cache.set(path, image);
+          resolve({ layer: dna, loadedImage: image });
+        }
       } else {
         const image = await loadImage(`${dna.selectedElement?.path}`);
-        cache.set(path, image);
         resolve({ layer: dna, loadedImage: image });
       }
     });
@@ -610,13 +616,13 @@ const startCreating = async () => {
 };
 
 const createSingleDna = (dnaArray: any[]) => {
-  let randNum: any[] = [];
+  let dna: any[] = [];
   dnaArray.forEach((layer) => {
-    randNum.push(
+    dna.push(
       `${layer.selectedElement.id}:${layer.selectedElement.filename}`,
     );
   });
-  return randNum.join(DNA_DELIMITER);
+  return dna.join(DNA_DELIMITER);
 };
 
 const saveSingleMetaData = (number: number) => {
@@ -627,14 +633,11 @@ const saveSingleMetaData = (number: number) => {
   );
 };
 
-const createSingle = async (number: number) => {
+export const createSingle = async () => {
+  let number = 1;
   const baseList = 'b1, base, ';
-  let layersList: any[] = [];
-  let layer0 = layersSetup(
-    layerConfigurations[0].layersOrder,
-  );
-
-  layer0.forEach((layer: any) => {
+  let layersList: ILayer[] = [];
+  layersSetup(layerConfigurations[0].layersOrder).forEach((layer) => {
     let newLayer = JSON.parse(JSON.stringify(layer));
     newLayer.elements = [];
     for (let i = 0; i < layer.elements.length; i++) {
@@ -648,7 +651,7 @@ const createSingle = async (number: number) => {
   number = 1;
 
   const array = list.split(', ');
-  let results: any[] = [];
+  let results: IDnaElement[] = [];
 
   layersList.forEach((layer) => {
     layer.elements.forEach((trait: any) => {
@@ -656,15 +659,17 @@ const createSingle = async (number: number) => {
         results.push({
           name: layer.name,
           selectedElement: trait,
+          blend: null,
+          opacity: 1,
         });
       }
     });
   });
   let dna = createSingleDna(results);
-  let loadedElements: any[] = [];
-  results.forEach((layer) => {
-    if (layer) {
-      loadedElements.push(loadLayerImg(layer));
+  let loadedElements: Promise<IImage | null>[] = [];
+  results.forEach((dna) => {
+    if (dna) {
+      loadedElements.push(loadLayerImg(dna));
     }
   });
 
@@ -682,7 +687,6 @@ const createSingle = async (number: number) => {
       )}`,
     );
   });
-
 };
 
 module.exports = { startCreating, buildSetup, getElements, createSingle };

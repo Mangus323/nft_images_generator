@@ -43,3 +43,15 @@ export interface IImage {
   layer: IDnaElement;
 }
 
+export interface IJSONImage {
+  dna: string;
+  attributes: IAttribute[];
+}
+
+export interface IAttribute {
+  trait_type: string;
+  value: number;
+  weight: number;
+  name: string;
+}
+

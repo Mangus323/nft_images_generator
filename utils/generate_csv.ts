@@ -1,9 +1,11 @@
+import { IJSONImage } from './types';
+
 const fs = require("fs");
 const basePath = process.cwd();
 const buildDir = `${basePath}/build`;
 const separator = ";"
 const totalCount = 1000;
-let rawData = [];
+let rawData: IJSONImage[] = [];
 
 const getRawData = () => {
   for (let i = 1; i <= 10000; i++) {
@@ -15,7 +17,7 @@ const getRawData = () => {
   }
 }
 
-const getScore = (trait_type, name) => {
+const getScore = (trait_type: string, name: string) => {
   let traitCount = 0;
   for (let i = 0; i < rawData.length; i++) {
     for (let j = 0; j < rawData[i].attributes.length; j++) {
@@ -28,7 +30,7 @@ const getScore = (trait_type, name) => {
     let backgroundModifier = 0;
     switch (name) {
       case "Gold":
-        backgroundModifier = 500;
+        backgroundModifier = 490;
         break;
       case "Red":
         backgroundModifier = 475;
@@ -57,7 +59,7 @@ const getScore = (trait_type, name) => {
   return ((totalCount / (traitCount + 3)) / 1.25).toFixed(2);
 }
 
-const getTraitsCountScore = (count) => {
+const getTraitsCountScore = (count: number) => {
   let traitsCount = 0;
   for (let i = 0; i < rawData.length; i++) {
     let traitCount = 0
@@ -73,7 +75,7 @@ const getTraitsCountScore = (count) => {
   }
   return (totalCount / traitsCount).toFixed(2);
 }
-const generateCSV = () => {
+export const generateCSV = () => {
   getRawData();
 
   let csv = `Monkey #${separator}No. of traits${separator}Points${separator}`;
@@ -113,9 +115,5 @@ const generateCSV = () => {
 
   console.log("sum traits: " + sumTrait);
   fs.writeFileSync("./build/csv/list.csv", csv);
-}
-
-module.exports = {
-  generateCSV
 }
 
