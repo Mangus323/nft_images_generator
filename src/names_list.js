@@ -208,6 +208,18 @@ const getTraitName = (name) => {
   return "";
 };
 
+const getTraitByName = (name, trait_type) => {
+  for (const namesListKey in names_list) {
+    if (names_list[namesListKey] === name)
+
+      if (!(trait_type !== 'Background' && namesListKey[0] === 'b')) {
+        return namesListKey;
+      }
+
+  }
+}
+
 module.exports = {
-  getTraitName
+  getTraitName,
+  getTraitByName
 };
