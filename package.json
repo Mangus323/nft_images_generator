@@ -16,6 +16,7 @@
     "generate": "node index.js",
     "rarity": "node utils/rarity.js",
     "csv": "node utils/generate_csv.js",
+    "single": "node utils/create_single.js",
     "preview": "node utils/preview.js",
     "pixelate": "node utils/pixelate.js",
     "update_info": "node utils/update_info.js",

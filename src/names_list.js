@@ -58,7 +58,6 @@ const names_list = {
   t32: "Dungarees",
   t25: "Prison jumpsuit",
   t35: "Bulletproof vest",
-  t49: "Tanktop",
   t52: "Puffer vest",
   t47: "High visibility vest",
   t24: "Leather jacket",

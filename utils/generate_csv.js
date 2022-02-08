@@ -50,7 +50,7 @@ const getScore = (trait_type, name) => {
         backgroundModifier = 0;
         break;
     }
-    return (backgroundModifier + totalCount * (Math.sqrt(111)) / traitCount).toFixed(2);
+    return (backgroundModifier + totalCount * (Math.sqrt(200)) / traitCount).toFixed(2);
   }
   return ((totalCount / (traitCount + 3)) / 1.25).toFixed(2);
 }

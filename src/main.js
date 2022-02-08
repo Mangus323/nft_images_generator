@@ -116,6 +116,13 @@ const saveImage = (_editionCount) => {
   );
 };
 
+const saveSingleImage = (number) => {
+  fs.writeFileSync(
+    `${buildDir}/single/${number}.png`,
+    canvas.toBuffer("image/png")
+  );
+};
+
 const genColor = () => {
   let hue = Math.floor(Math.random() * 360);
   return `hsl(${hue}, 100%, ${background.brightness})`;
@@ -171,15 +178,16 @@ const addMetadata = (_dna, _edition) => {
 
 const addAttributes = (_element) => {
   let selectedElement = _element.layer.selectedElement;
+  if (_element.layer.name.includes('Base')) {
+    return;
+  }
+
   let name = getTraitName(selectedElement.name);
   if (selectedElement.name === 'empty' && !(_element.layer.name.includes('Mouth'))) {
     name = "N/A";
   }
   if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
     name = "Brown";
-  }
-  if (_element.layer.name.includes('Base')) {
-    return;
   }
   if (_element.layer.name.includes('Background')) {
     const layerName = _element.layer.name.slice(0, 10);
@@ -390,7 +398,7 @@ const createDna = (_layers, layersList, max, min) => {
         layer.bypassDNA ? "?bypassDNA=true" : ""
       }`;
   })
-  if (!dnaArray[1].path.includes('Clothes')) {
+  if (!dnaArray[1].path.includes('Body')) {
     return "";
   }
 
@@ -466,11 +474,11 @@ const startCreating = async () => {
   let editionCount = 1;
   let failedCount = 0;
   let abstractedIndexes = [];
-  let totalCount = 0;
+  let totalCount = 1;
   layerConfigurations.forEach((item) => {
     totalCount += item.count;
   })
-  for (let i = 0; i <= totalCount; i++) {
+  for (let i = 1; i <= totalCount; i++) {
     abstractedIndexes.push(i + 1);
   }
   // new unique layers
@@ -555,20 +563,58 @@ const startCreating = async () => {
 
         let loadedElements = [];
 
-        if (results[8].selectedElement.name === 't104') {
-          // change layer order
-          const changeableArrayOrder = [
+        let earsToRight = false;
+        let earsToEnd = false;
+        // change layer order with t104
+        if (results[7].selectedElement.name === 't104') {
+          const earsToEndHeads = [
             't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
             't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
-          const isChangeOrder = changeableArrayOrder.find((item) => {
+          const isEarsToEnd = earsToEndHeads.find((item) => {
             return item === results[10].selectedElement.name;
           })
 
-          if (isChangeOrder) {
-            console.log('Changing order!');
-            const cloneEars = JSON.parse(JSON.stringify(results[8]));
-            results[8] = null;
+          const cloneEars = JSON.parse(JSON.stringify(results[7]));
+          console.log('Changing order t104!');
+          if (isEarsToEnd) {
+            results[7] = null;
             results.push(cloneEars);
+            earsToEnd = true;
+          } else {
+            results[7] = results[8]
+            results[8] = cloneEars;
+            earsToRight = true;
+          }
+        }
+
+        // change layer order with t103
+        if (results[7]) {
+          if (results[7].selectedElement.name === 't103') {
+            // change layer order with t103
+            console.log('Changing order t103!');
+            const cloneEars = JSON.parse(JSON.stringify(results[7]));
+            results[7] = results[6];
+            results[6] = cloneEars;
+          }
+        }
+
+        // повязки на глаза
+        const eyeWear = ['t86', 't89', 't90', 't94']
+        if (eyeWear.find((item) => {
+          return item === results[8].selectedElement.name;
+        })) {
+          const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
+          if (earsToRight) {
+            results[6] = results[7];
+            results[7] = cloneFaceMask;
+          }
+          if (earsToEnd) {
+            results[6] = results[8];
+            results[8] = cloneFaceMask;
+          } else {
+            results[6] = results[8];
+            results[8] = results[7];
+            results[7] = cloneFaceMask;
           }
         }
 
@@ -646,4 +692,83 @@ const startCreating = async () => {
   writeMetaData(JSON.stringify(metadataList, null, 2));
 };
 
-module.exports = {startCreating, buildSetup, getElements};
+const createSingleDna = (dnaArray) => {
+  let randNum = [];
+  dnaArray.forEach((layer) => {
+    randNum.push(
+      `${layer.selectedElement.id}:${layer.selectedElement.filename}`
+    )
+  })
+  return randNum.join(DNA_DELIMITER);
+};
+
+const saveSingleMetaData = (number) => {
+  let metadata = metadataList.find((meta) => meta.edition === number);
+  fs.writeFileSync(
+    `${buildDir}/single/${number}.json`,
+    JSON.stringify(metadata, null, 2)
+  );
+};
+
+const createSingle = async (number) => {
+  const baseList = "b1, base, ";
+  let layersList = [];
+  let layer0 = layersSetup(
+    layerConfigurations[0].layersOrder
+  );
+
+  layer0.forEach((layer) => {
+    let newLayer = JSON.parse(JSON.stringify(layer));
+    newLayer.elements = [];
+    for (let i = 0; i < layer.elements.length; i++) {
+      let newLayerElement = JSON.parse(JSON.stringify(layer.elements[i]));
+      newLayer.elements.push(newLayerElement);
+    }
+    layersList.push(newLayer);
+  })
+
+  const list = baseList + "t1, t130, t103";
+  number = 1;
+
+  const array = list.split(', ');
+  let results = [];
+
+  layersList.forEach((layer) => {
+    layer.elements.forEach((trait) => {
+      if (array.includes(trait.name)) {
+        results.push({
+          name: layer.name,
+          selectedElement: trait,
+        });
+      }
+    })
+  })
+  let dna = createSingleDna(results);
+  let loadedElements = [];
+  results.forEach((layer) => {
+    if (layer) {
+      loadedElements.push(loadLayerImg(layer));
+    }
+  });
+
+  await Promise.all(loadedElements).then((renderObjectArray) => {
+    ctx.clearRect(0, 0, format.width, format.height);
+    renderObjectArray.forEach((renderObject, index) => {
+      drawElement(
+        renderObject,
+        index,
+      );
+    });
+    saveSingleImage(number);
+    addMetadata(dna, number);
+    saveSingleMetaData(number);
+    console.log(
+      `Created single image with number ${number} and DNA: ${sha1(
+        dna
+      )}`
+    );
+  });
+
+}
+
+module.exports = {startCreating, buildSetup, getElements, createSingle};
