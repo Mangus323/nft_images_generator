@@ -1,12 +1,14 @@
-const basePath = process.cwd();
 const fs = require("fs");
+const basePath = process.cwd();
+const buildDir = `${basePath}/build`;
 const separator = ";"
 const totalCount = 1000;
+let rawData = [];
 
 const getRawData = () => {
   for (let i = 1; i <= 10000; i++) {
     try {
-      rawData.push(JSON.parse(fs.readFileSync(`${basePath}/build/json/${i}.json`)));
+      rawData.push(JSON.parse(fs.readFileSync(`${buildDir}/json/${i}.json`)));
     } catch (e) {
       return;
     }
@@ -71,46 +73,49 @@ const getTraitsCountScore = (count) => {
   }
   return (totalCount / traitsCount).toFixed(2);
 }
+const generateCSV = () => {
+  getRawData();
 
-let rawData = [];
-getRawData();
+  let csv = `Monkey #${separator}No. of traits${separator}Points${separator}`;
 
-let csv = `Monkey #${separator}No. of traits${separator}Points${separator}`;
-
-rawData[0].attributes.forEach((item) => {
-  csv += `${item.trait_type}${separator}Points${separator}`;
-})
-csv += 'Total Score \n'
-
-let sumTrait = 0
-
-let rows = rawData.map((row, count) => {
-  let returnString = `${count + 1}${separator}`;
-  let traitCount = 0;
-  let totalScore = 0;
-  row.attributes.forEach((item, index) => {
-    if (index < 3) return;
-    if (item.value) {
-      traitCount++;
-    }
+  rawData[0].attributes.forEach((item) => {
+    csv += `${item.trait_type}${separator}Points${separator}`;
   })
+  csv += 'Total Score \n'
 
-  let traitsCountScore = getTraitsCountScore(traitCount);
-  totalScore += +traitsCountScore;
-  returnString += `${traitCount}${separator}${traitsCountScore}${separator}`
+  let sumTrait = 0
 
-  row.attributes.forEach((item) => {
-    let score = getScore(item.trait_type, item.name);
-    totalScore += +score;
-    returnString += `${item.name}${separator}${score}${separator}`;
-  })
-  sumTrait += traitCount
-  returnString += totalScore.toFixed(2);
-  return returnString;
-}).join("\n")
-csv += rows;
+  let rows = rawData.map((row, count) => {
+    let returnString = `${count + 1}${separator}`;
+    let traitCount = 0;
+    let totalScore = 0;
+    row.attributes.forEach((item, index) => {
+      if (index < 3) return;
+      if (item.value) {
+        traitCount++;
+      }
+    })
 
-console.log("sum traits: " + sumTrait);
+    let traitsCountScore = getTraitsCountScore(traitCount);
+    totalScore += +traitsCountScore;
+    returnString += `${traitCount}${separator}${traitsCountScore}${separator}`
 
-fs.writeFileSync("./csv/list.csv", csv);
+    row.attributes.forEach((item) => {
+      let score = getScore(item.trait_type, item.name);
+      totalScore += +score;
+      returnString += `${item.name}${separator}${score}${separator}`;
+    })
+    sumTrait += traitCount
+    returnString += totalScore.toFixed(2);
+    return returnString;
+  }).join("\n")
+  csv += rows;
+
+  console.log("sum traits: " + sumTrait);
+  fs.writeFileSync("./build/csv/list.csv", csv);
+}
+
+module.exports = {
+  generateCSV
+}
 

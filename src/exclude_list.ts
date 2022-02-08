@@ -1,4 +1,4 @@
-const exclude_list = {
+const exclude_list: any = {
   // clothes
   t13: 't103, t55, t56, t58, t59, t61, t64, t65, t120, t121, t122, t123, t124, t125, t126, t127, t128, t129, t130, t131, t132, t133, t134, t135, t136, t137, t138, t139, t140, t141, t142, t143, t144, t145, t146, t147, t148, t149, t150, t151, t152, t153, t154, t155, t68, t69, t70, t71, t72, t73, t74, t102, t100, t101, t104, t105, t655, t654, t85, t160, t97',
   t21: 't68, t69, t70, t71, t72, t73, t74',
@@ -112,13 +112,9 @@ const exclude_list = {
   t655: 't59, t65',
 }
 
-const getExcludes = (name) => {
+export const getExcludes = (name: string): string[] => {
   if (exclude_list[name]) {
     return exclude_list[name].split(', ');
   }
   return [];
-};
-
-module.exports = {
-  getExcludes
 };

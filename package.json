@@ -12,10 +12,9 @@
     ]
   },
   "scripts": {
-    "build": "node index.js",
+    "build": "ts-node index.js",
     "generate": "node index.js",
-    "rarity": "node utils/rarity.js",
-    "csv": "node utils/generate_csv.js",
+    "csv": "node src/csv.ts",
     "single": "node utils/create_single.js",
     "preview": "node utils/preview.js",
     "pixelate": "node utils/pixelate.js",
@@ -26,9 +25,13 @@
   "author": "Daniel Eugene Botha (HashLips)",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^17.0.16",
     "canvas": "^2.8.0",
     "gif-encoder-2": "^1.0.5",
+    "prettier": "^2.5.1",
     "pseudo-random": "^0.6.0",
-    "sha1": "^1.1.1"
+    "sha1": "^1.1.1",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
   }
 }

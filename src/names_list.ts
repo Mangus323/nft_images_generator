@@ -1,4 +1,4 @@
-const names_list = {
+const names_list: any = {
   // Background
   b1: "Gold",
   b2: "Red",
@@ -200,7 +200,7 @@ const names_list = {
 
 }
 
-const getTraitName = (name) => {
+export const getTraitName = (name: string) => {
   if (names_list[name]) {
     return names_list[name];
   }
@@ -208,18 +208,12 @@ const getTraitName = (name) => {
   return "";
 };
 
-const getTraitByName = (name, trait_type) => {
+export const getTraitByName = (name: string, trait_type: string) => {
   for (const namesListKey in names_list) {
     if (names_list[namesListKey] === name)
-
       if (!(trait_type !== 'Background' && namesListKey[0] === 'b')) {
         return namesListKey;
       }
 
   }
 }
-
-module.exports = {
-  getTraitName,
-  getTraitByName
-};
