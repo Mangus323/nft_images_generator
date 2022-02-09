@@ -1,15 +1,9 @@
-import { IDnaElement, IImage, ILayer, ILayerConfigurationItem, ILayerElement, IRemove } from '../utils/types';
-
-const fs = require('fs');
-const basePath = process.cwd();
-const buildDir = `${basePath}/build`;
-const layersDir = `${basePath}/layers`;
+import { IDnaElement, IImage, ILayer, ILayerElement, IRemove } from '../utils/types';
 import {
   baseUri,
   description,
   uniqueDnaTorrance,
   layerConfigurations,
-  rarityDelimiter,
   extraMetadata,
   namePrefix,
 } from './config';
@@ -19,6 +13,7 @@ import shuffle from '../utils/shuffle';
 
 import sha1 from 'sha1';
 import { drawElement, loadLayerImg, saveImage } from '../utils/image';
+import { layersSetup, saveMetaDataSingleFile, writeMetaData } from '../utils/fs';
 
 const DNA_DELIMITER = '-';
 
@@ -27,66 +22,11 @@ let attributesList: any[] = [];
 let remove: IRemove[] = [];
 const emptyElements: any[] = [];
 
-const buildSetup = () => {
-  if (fs.existsSync(buildDir)) {
-    fs.rmdirSync(buildDir, { recursive: true });
-  }
-  fs.mkdirSync(buildDir);
-  fs.mkdirSync(`${buildDir}/json`);
-  fs.mkdirSync(`${buildDir}/images`);
-  fs.mkdirSync(`${buildDir}/csv`);
-};
-
-const getRarityWeight = (_str: string) => {
-  let nameWithoutExtension = _str.slice(0, -4);
-  let nameWithoutWeight = Number(nameWithoutExtension.split(rarityDelimiter).pop());
-  if (isNaN(nameWithoutWeight)) {
-    nameWithoutWeight = 1;
-  }
-  return nameWithoutWeight;
-};
 
 const cleanDna = (_str: string) => {
   const withoutOptions = removeQueryStrings(_str);
   return Number(withoutOptions.split(':').shift());
 };
-
-const cleanName = (_str: string) => {
-  let nameWithoutExtension = _str.slice(0, -4);
-  return nameWithoutExtension.split(rarityDelimiter).shift();
-};
-
-const getElements = (path: string): ILayerElement[] => {
-  return fs
-    .readdirSync(path)
-    .filter((item: string) => !/(^|\/)\.[^\/.]/g.test(item))
-    .map((i: string, index: number) => {
-      if (i.includes('-')) {
-        throw new Error(`layer name can not contain dashes, please fix: ${i}`);
-      }
-      return {
-        id: index,
-        name: cleanName(i),
-        filename: i,
-        path: `${path}${i}`,
-        weight: getRarityWeight(i),
-      };
-    });
-};
-
-const layersSetup = (layersOrder: ILayerConfigurationItem['layersOrder']): ILayer[] => {
-  return layersOrder.map((layerObj, index: number) => {
-    return {
-      id: index,
-      elements: getElements(`${layersDir}/${layerObj.name}/`),
-      name: layerObj.name,
-      blend: 'source-over',
-      opacity: 1,
-      bypassDNA: false,
-    };
-  });
-};
-
 
 const addMetadata = (_dna: string, _edition: number) => {
   let dateTime = Date.now();
@@ -293,17 +233,6 @@ const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min:
   return randNum.join(DNA_DELIMITER);
 };
 
-const writeMetaData = (_data: any) => {
-  fs.writeFileSync(`${buildDir}/json/_metadata.json`, _data);
-};
-
-const saveMetaDataSingleFile = (_editionCount: number) => {
-  let metadata = metadataList.find((meta) => meta.edition === _editionCount);
-  fs.writeFileSync(
-    `${buildDir}/json/${_editionCount}.json`,
-    JSON.stringify(metadata, null, 2),
-  );
-};
 
 const getTraitsIds = (count: number) => {
   let traitsIds = [4, 5, 6, 7, 8, 9];
@@ -381,7 +310,7 @@ const changeOrder = (results: Array<IDnaElement | null>) => {
   return results;
 };
 
-const startCreating = async () => {
+export const startCreating = async () => {
   let layerConfigIndex = 0;
   // количество созданных
   let editionCount = 1;
@@ -489,7 +418,7 @@ const startCreating = async () => {
           });
           saveImage(abstractedIndexes[0]);
           addMetadata(newDna, abstractedIndexes[0]);
-          saveMetaDataSingleFile(abstractedIndexes[0]);
+          saveMetaDataSingleFile(abstractedIndexes[0], metadataList);
           console.log(
             `Created edition: ${abstractedIndexes[0]}, with DNA: ${sha1(
               newDna,
@@ -542,5 +471,3 @@ const startCreating = async () => {
   }
   writeMetaData(JSON.stringify(metadataList, null, 2));
 };
-
-module.exports = { startCreating, buildSetup, getElements };
