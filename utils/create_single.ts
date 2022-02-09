@@ -39,7 +39,7 @@ const addAttributes = (_element: IImage | null) => {
     name = 'N/A';
   }
   if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
-    name = 'Brown';
+    name = 'Black';
   }
   if (_element.layer.name.includes('Background')) {
     const layerName = _element.layer.name.slice(0, 10);

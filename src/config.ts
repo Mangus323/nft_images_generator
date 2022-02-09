@@ -7,7 +7,7 @@ const baseUri = 'ipfs://NewUriToReplace';
 
 const layerConfigurations: ILayerConfigurationItem[] = [
   {
-    count: 9,
+    count: 10,
     maxTraits: 8,
     minTraits: 5,
     layersOrder: [
@@ -113,7 +113,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   }, {
     count: 235,
     maxTraits: 3,
-    minTraits: 3,
+    minTraits: 2,
     layersOrder: [
       { name: 'Background7' },
       { name: 'Base' },

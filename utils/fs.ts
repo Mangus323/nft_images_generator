@@ -1,11 +1,13 @@
 import { ILayer, ILayerConfigurationItem, ILayerElement } from './types';
 import { rarityDelimiter } from '../src/config';
+import { getWeight } from '../src/weight_list';
 
 const fs = require('fs');
 const basePath = process.cwd();
 const buildDir = `${basePath}/build`;
 const layersDir = `${basePath}/layers`;
 
+//устаревший метод
 const getRarityWeight = (_str: string) => {
   let nameWithoutExtension = _str.slice(0, -4);
   let nameWithoutWeight = Number(nameWithoutExtension.split(rarityDelimiter).pop());
@@ -15,9 +17,15 @@ const getRarityWeight = (_str: string) => {
   return nameWithoutWeight;
 };
 
-const cleanName = (_str: string) => {
+const cleanName = (_str: string): string => {
   let nameWithoutExtension = _str.slice(0, -4);
-  return nameWithoutExtension.split(rarityDelimiter).shift();
+
+  let stroke = nameWithoutExtension.split(rarityDelimiter).shift();
+  if (stroke) {
+    return stroke;
+  }
+  console.log('ERROR NOT FOUND CLEAN NAME: ' + stroke);
+  return '';
 };
 
 export const buildSetup = () => {
@@ -56,7 +64,7 @@ export const getElements = (name: string): ILayerElement[] => {
         name: cleanName(i),
         filename: i,
         path: `${path}${i}`,
-        weight: getRarityWeight(i),
+        weight: getWeight(cleanName(i)),
       };
     });
 };

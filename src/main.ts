@@ -58,7 +58,7 @@ const addAttributes = (_element: IImage | null) => {
     name = 'N/A';
   }
   if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
-    name = 'Brown';
+    name = 'Black';
   }
   if (_element.layer.name.includes('Background')) {
     const layerName = _element.layer.name.slice(0, 10);
@@ -87,12 +87,16 @@ const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer
     let selectedElement = layer.elements.find(
       (e) => e.id === cleanDna(_dna.split(DNA_DELIMITER)[index]),
     );
-    dna.push({
-      name: layer.name,
-      blend: layer.blend,
-      opacity: layer.opacity,
-      selectedElement: selectedElement,
-    });
+    if (selectedElement) {
+      dna.push({
+        name: layer.name,
+        blend: layer.blend,
+        opacity: layer.opacity,
+        selectedElement: selectedElement,
+      });
+    } else {
+      console.log('ERROR NOT FOUND SELECTED ELEMENT: ' + _dna);
+    }
   });
   layersList.forEach((layer, index) => {
     if (index < 2) return;
@@ -251,63 +255,106 @@ const changeTraitId = (traitsIds: number[], index: number): number[] => {
   }
 };
 
+
 const changeOrder = (results: Array<IDnaElement | null>) => {
-  let earsToRight = false;
-  let earsToEnd = false;
-  // change layer order with t104
-  if (results[7]?.selectedElement?.name === 't104') {
-    const earsToEndHeads = [
-      't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
-      't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
-    const isEarsToEnd = earsToEndHeads.find((item) => {
-      return item === results[10]?.selectedElement?.name;
-    });
+  let returnResults = JSON.parse(JSON.stringify(results));
 
-    const cloneEars = JSON.parse(JSON.stringify(results[7]));
-    console.log('Changing order t104!');
-    if (isEarsToEnd) {
-      results[7] = null;
-      results.push(cloneEars);
-      earsToEnd = true;
-    } else {
-      results[7] = results[8];
-      results[8] = cloneEars;
-      earsToRight = true;
+  for (let i = 0; i < results.length; i++) {
+    let name = results[i]?.selectedElement.name;
+    if (name) {
+      if (name === 't59') {
+        returnResults = changeOrderSingleTrait(returnResults, i, 'Head');
+      }
+
+      // ear wear
+      let earWear = ['t100', 't101', 't102', 't104', 't105'];
+
+      if (earWear.includes(name)) {
+        returnResults = changeOrderSingleTrait(returnResults, i, 'Head');
+      }
     }
+
   }
 
-  // change layer order with t103
-  if (results[7]) {
-    if (results[7].selectedElement?.name === 't103') {
-      console.log('Changing order t103!');
-      const cloneEars = JSON.parse(JSON.stringify(results[7]));
-      results[7] = results[6];
-      results[6] = cloneEars;
-    }
-  }
-
-  // повязки на глаза
-  const eyeWear = ['t86', 't89', 't90', 't94'];
-  if (eyeWear.find((item) => {
-    return item === results[8]?.selectedElement?.name;
-  })) {
-    const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
-    if (earsToRight) {
-      results[6] = results[7];
-      results[7] = cloneFaceMask;
-    }
-    if (earsToEnd) {
-      results[6] = results[8];
-      results[8] = cloneFaceMask;
-    } else {
-      results[6] = results[8];
-      results[8] = results[7];
-      results[7] = cloneFaceMask;
-    }
-  }
-
-  return results;
+  return returnResults;
 };
+
+const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number, afterLayerName: string, afterItems: Array<string> = []) => {
+  let returnResults: Array<IDnaElement> = JSON.parse(JSON.stringify(results));
+  let afterLayerIndex = 0;
+
+  for (let i = 0; i < results.length; i++) {
+    if (results[i].name === afterLayerName) {
+
+      if (afterItems.length === 0 || afterItems.includes(results[i].selectedElement.name)) {
+        afterLayerIndex = i;
+        break;
+      }
+    }
+  }
+  let item = returnResults.splice(layerIndex, 1);
+  returnResults.splice(afterLayerIndex, 0, ...item);
+  return returnResults;
+};
+
+//monkey
+// const changeOrder = (results: Array<IDnaElement | null>) => {
+//   let earsToRight = false;
+//   let earsToEnd = false;
+//   // change layer order with t104
+//   if (results[7]?.selectedElement?.name === 't104') {
+//     const earsToEndHeads = [
+//       't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
+//       't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
+//     const isEarsToEnd = earsToEndHeads.find((item) => {
+//       return item === results[10]?.selectedElement?.name;
+//     });
+//
+//     const cloneEars = JSON.parse(JSON.stringify(results[7]));
+//     console.log('Changing order t104!');
+//     if (isEarsToEnd) {
+//       results[7] = null;
+//       results.push(cloneEars);
+//       earsToEnd = true;
+//     } else {
+//       results[7] = results[8];
+//       results[8] = cloneEars;
+//       earsToRight = true;
+//     }
+//   }
+//
+//   // change layer order with t103
+//   if (results[7]) {
+//     if (results[7].selectedElement?.name === 't103') {
+//       console.log('Changing order t103!');
+//       const cloneEars = JSON.parse(JSON.stringify(results[7]));
+//       results[7] = results[6];
+//       results[6] = cloneEars;
+//     }
+//   }
+//
+//   // повязки на глаза
+//   const eyeWear = ['t86', 't89', 't90', 't94'];
+//   if (eyeWear.find((item) => {
+//     return item === results[8]?.selectedElement?.name;
+//   })) {
+//     const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
+//     if (earsToRight) {
+//       results[6] = results[7];
+//       results[7] = cloneFaceMask;
+//     }
+//     if (earsToEnd) {
+//       results[6] = results[8];
+//       results[8] = cloneFaceMask;
+//     } else {
+//       results[6] = results[8];
+//       results[8] = results[7];
+//       results[7] = cloneFaceMask;
+//     }
+//   }
+//
+//   return results;
+// };
 
 export const startCreating = async () => {
   let layerConfigIndex = 0;
@@ -320,7 +367,7 @@ export const startCreating = async () => {
     totalCount += item.count;
   });
   for (let i = 1; i <= totalCount; i++) {
-    abstractedIndexes.push(i + 1);
+    abstractedIndexes.push(i);
   }
   // new unique layers
   let layersList: ILayer[] = [];
