@@ -80,7 +80,6 @@ const addAttributes = (_element: IImage | null) => {
   });
 };
 
-
 const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer[]): Array<IDnaElement | null> => {
   const dna: IDnaElement[] = [];
   baseLayers.forEach((layer, index) => {

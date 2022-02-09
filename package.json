@@ -12,7 +12,7 @@
     ]
   },
   "scripts": {
-    "build": "ts-node index.js",
+    "build": "ts-node index.ts",
     "csv": "ts-node src/csv.ts",
     "single": "ts-node utils/create_single.ts",
     "preview": "node utils/preview.js",
