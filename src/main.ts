@@ -5,27 +5,22 @@ const basePath = process.cwd();
 const buildDir = `${basePath}/build`;
 const layersDir = `${basePath}/layers`;
 import {
-  format,
   baseUri,
   description,
-  background,
   uniqueDnaTorrance,
   layerConfigurations,
   rarityDelimiter,
   extraMetadata,
   namePrefix,
-  caching,
 } from './config';
 import { getExcludes } from './exclude_list';
 import { getTraitName } from './names_list';
 import shuffle from '../utils/shuffle';
-import { createCanvas, Image, loadImage } from 'canvas';
+
 import sha1 from 'sha1';
+import { drawElement, loadLayerImg, saveImage } from '../utils/image';
 
 const DNA_DELIMITER = '-';
-const canvas = createCanvas(format.width, format.height);
-const ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = format.smoothing;
 
 let metadataList: any[] = [];
 let attributesList: any[] = [];
@@ -92,29 +87,6 @@ const layersSetup = (layersOrder: ILayerConfigurationItem['layersOrder']): ILaye
   });
 };
 
-const saveImage = (_editionCount: number | string) => {
-  fs.writeFileSync(
-    `${buildDir}/images/${_editionCount}.png`,
-    canvas.toBuffer('image/png'),
-  );
-};
-
-const saveSingleImage = (number: number | string) => {
-  fs.writeFileSync(
-    `${buildDir}/single/${number}.png`,
-    canvas.toBuffer('image/png'),
-  );
-};
-
-const genColor = () => {
-  let hue = Math.floor(Math.random() * 360);
-  return `hsl(${hue}, 100%, ${background.brightness})`;
-};
-
-const drawBackground = () => {
-  ctx.fillStyle = background.static ? background.default : genColor();
-  ctx.fillRect(0, 0, format.width, format.height);
-};
 
 const addMetadata = (_dna: string, _edition: number) => {
   let dateTime = Date.now();
@@ -133,8 +105,10 @@ const addMetadata = (_dna: string, _edition: number) => {
   attributesList = [];
 };
 
-const addAttributes = (_element: any) => {
+const addAttributes = (_element: IImage | null) => {
+  if (!_element) return;
   let selectedElement = _element.layer.selectedElement;
+  if (!selectedElement) return;
   if (_element.layer.name.includes('Base')) {
     return;
   }
@@ -166,48 +140,6 @@ const addAttributes = (_element: any) => {
   });
 };
 
-const cache = new Map<string, Image>();
-
-const loadLayerImg = async (dna: IDnaElement): Promise<IImage | null> => {
-  try {
-    return new Promise(async (resolve) => {
-      const path = `${dna.selectedElement?.path}`;
-
-      if (caching) {
-        let cacheItem = cache.get(path);
-        if (cacheItem) {
-          resolve({ layer: dna, loadedImage: cacheItem });
-        } else {
-          const image = await loadImage(`${dna.selectedElement?.path}`);
-          cache.set(path, image);
-          resolve({ layer: dna, loadedImage: image });
-        }
-      } else {
-        const image = await loadImage(`${dna.selectedElement?.path}`);
-        resolve({ layer: dna, loadedImage: image });
-      }
-    });
-  } catch (error) {
-    console.error('Error loading image:', error);
-    return null;
-  }
-};
-
-const drawElement = (renderObject: Awaited<IImage | null>) => {
-  if (renderObject) {
-    ctx.globalAlpha = renderObject.layer.opacity;
-    ctx.globalCompositeOperation = renderObject.layer.blend;
-    ctx.drawImage(
-      renderObject.loadedImage,
-      0,
-      0,
-      format.width,
-      format.height,
-    );
-  }
-
-  addAttributes(renderObject);
-};
 
 const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer[]): Array<IDnaElement | null> => {
   const dna: IDnaElement[] = [];
@@ -419,7 +351,6 @@ const changeOrder = (results: Array<IDnaElement | null>) => {
   // change layer order with t103
   if (results[7]) {
     if (results[7].selectedElement?.name === 't103') {
-      // change layer order with t103
       console.log('Changing order t103!');
       const cloneEars = JSON.parse(JSON.stringify(results[7]));
       results[7] = results[6];
@@ -552,12 +483,9 @@ const startCreating = async () => {
         });
 
         await Promise.all(loadedElements).then((renderObjectArray) => {
-          ctx.clearRect(0, 0, format.width, format.height);
-          if (background.generate) {
-            drawBackground();
-          }
           renderObjectArray.forEach((renderObject) => {
             drawElement(renderObject);
+            addAttributes(renderObject);
           });
           saveImage(abstractedIndexes[0]);
           addMetadata(newDna, abstractedIndexes[0]);
@@ -615,78 +543,4 @@ const startCreating = async () => {
   writeMetaData(JSON.stringify(metadataList, null, 2));
 };
 
-const createSingleDna = (dnaArray: any[]) => {
-  let dna: any[] = [];
-  dnaArray.forEach((layer) => {
-    dna.push(
-      `${layer.selectedElement.id}:${layer.selectedElement.filename}`,
-    );
-  });
-  return dna.join(DNA_DELIMITER);
-};
-
-const saveSingleMetaData = (number: number) => {
-  let metadata = metadataList.find((meta) => meta.edition === number);
-  fs.writeFileSync(
-    `${buildDir}/single/${number}.json`,
-    JSON.stringify(metadata, null, 2),
-  );
-};
-
-export const createSingle = async () => {
-  let number = 1;
-  const baseList = 'b1, base, ';
-  let layersList: ILayer[] = [];
-  layersSetup(layerConfigurations[0].layersOrder).forEach((layer) => {
-    let newLayer = JSON.parse(JSON.stringify(layer));
-    newLayer.elements = [];
-    for (let i = 0; i < layer.elements.length; i++) {
-      let newLayerElement = JSON.parse(JSON.stringify(layer.elements[i]));
-      newLayer.elements.push(newLayerElement);
-    }
-    layersList.push(newLayer);
-  });
-
-  const list = baseList + 't1, t130, t103';
-  number = 1;
-
-  const array = list.split(', ');
-  let results: IDnaElement[] = [];
-
-  layersList.forEach((layer) => {
-    layer.elements.forEach((trait: any) => {
-      if (array.includes(trait.name)) {
-        results.push({
-          name: layer.name,
-          selectedElement: trait,
-          blend: null,
-          opacity: 1,
-        });
-      }
-    });
-  });
-  let dna = createSingleDna(results);
-  let loadedElements: Promise<IImage | null>[] = [];
-  results.forEach((dna) => {
-    if (dna) {
-      loadedElements.push(loadLayerImg(dna));
-    }
-  });
-
-  await Promise.all(loadedElements).then((renderObjectArray) => {
-    ctx.clearRect(0, 0, format.width, format.height);
-    renderObjectArray.forEach((renderObject) => {
-      drawElement(renderObject);
-    });
-    saveSingleImage(number);
-    addMetadata(dna, number);
-    saveSingleMetaData(number);
-    console.log(
-      `Created single image with number ${number} and DNA: ${sha1(
-        dna,
-      )}`,
-    );
-  });
-};
-
-module.exports = { startCreating, buildSetup, getElements, createSingle };
+module.exports = { startCreating, buildSetup, getElements };

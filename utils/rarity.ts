@@ -1,6 +1,17 @@
 import { IJSONImage } from './types';
-import { getTraitByName } from '../src/names_list';
+import { names_list } from '../src/names_list';
 import { getExcludes } from '../src/exclude_list';
+
+let namesList = JSON.parse(JSON.stringify(names_list));
+
+export const getTraitByName = (name: string, trait_type: string) => {
+  for (const namesListKey in namesList) {
+    if (namesList[namesListKey] === name)
+      if (!(trait_type !== 'Background' && namesListKey[0] === 'b')) {
+        return namesListKey;
+      }
+  }
+};
 
 const basePath = process.cwd();
 const fs = require('fs');
@@ -49,6 +60,10 @@ export const generateRarity = () => {
 
     for (const traitTypeKey in traitList[traitType]) {
       let traitId = getTraitByName(traitTypeKey, traitType);
+      if (traitId) {
+        namesList[traitId] = null;
+      }
+
       let imagesIndexes = getTraitImagesIndexes(traitType, traitTypeKey);
 
       csv += `${traitTypeKey}${separator}${traitList[traitType][traitTypeKey]}${separator}${traitId}${separator}${getExcludes(traitId)}${separator}${imagesIndexes}\n`;

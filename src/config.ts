@@ -155,13 +155,6 @@ const format = {
   smoothing: false,
 };
 
-const background = {
-  generate: true,
-  brightness: '80%',
-  static: false,
-  default: '#000000',
-};
-
 const extraMetadata = {};
 
 const rarityDelimiter = '#';
@@ -172,7 +165,6 @@ export {
   format,
   baseUri,
   description,
-  background,
   uniqueDnaTorrance,
   layerConfigurations,
   rarityDelimiter,
