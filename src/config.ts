@@ -27,7 +27,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   {
     count: 25,
     maxTraits: 6,
-    minTraits: 5,
+    minTraits: 4,
     layersOrder: [
       { name: 'Background2' },
       { name: 'Base' },
@@ -45,7 +45,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   {
     count: 50,
     maxTraits: 5,
-    minTraits: 5,
+    minTraits: 4,
     layersOrder: [
       { name: 'Background3' },
       { name: 'Base' },
@@ -113,7 +113,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   }, {
     count: 235,
     maxTraits: 3,
-    minTraits: 2,
+    minTraits: 3,
     layersOrder: [
       { name: 'Background7' },
       { name: 'Base' },
