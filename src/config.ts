@@ -7,7 +7,7 @@ const baseUri = 'ipfs://NewUriToReplace';
 
 const layerConfigurations: ILayerConfigurationItem[] = [
   {
-    count: 9,
+    count: 10,
     maxTraits: 8,
     minTraits: 5,
     layersOrder: [
@@ -113,7 +113,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   }, {
     count: 235,
     maxTraits: 3,
-    minTraits: 3,
+    minTraits: 2,
     layersOrder: [
       { name: 'Background7' },
       { name: 'Base' },
@@ -147,7 +147,15 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   },
 ];
 
+const layerDefaultName = new Map<string, string>();
+layerDefaultName.set('Eyes', 'Black');
+layerDefaultName.set('Mouth', 'Frown');
+layerDefaultName.set('default', 'N/A');
+
 const caching = true;
+
+//used for csv files
+const imageName = 'Hyena';
 
 const format = {
   width: 2048,
@@ -157,8 +165,6 @@ const format = {
 
 const extraMetadata = {};
 
-const rarityDelimiter = '#';
-
 const uniqueDnaTorrance = 100000;
 
 export {
@@ -167,8 +173,9 @@ export {
   description,
   uniqueDnaTorrance,
   layerConfigurations,
-  rarityDelimiter,
   extraMetadata,
   namePrefix,
-  caching
+  layerDefaultName,
+  caching,
+  imageName
 };

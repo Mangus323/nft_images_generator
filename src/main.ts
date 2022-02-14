@@ -5,15 +5,15 @@ import {
   uniqueDnaTorrance,
   layerConfigurations,
   extraMetadata,
-  namePrefix,
+  namePrefix, layerDefaultName,
 } from './config';
 import { getExcludes } from './exclude_list';
 import { getTraitName } from './names_list';
 import shuffle from '../utils/shuffle';
-
 import sha1 from 'sha1';
 import { drawElement, loadLayerImg, saveImage } from '../utils/image';
 import { layersSetup, saveMetaDataSingleFile, writeMetaData } from '../utils/fs';
+import { getHashes } from '../utils/generate_hash';
 
 const DNA_DELIMITER = '-';
 
@@ -53,13 +53,21 @@ const addAttributes = (_element: IImage | null) => {
     return;
   }
 
-  let name = getTraitName(selectedElement.name);
-  if (selectedElement.name === 'empty' && !(_element.layer.name.includes('Mouth'))) {
-    name = 'N/A';
+  let name = '';
+  if (selectedElement.name === 'empty') {
+    layerDefaultName.forEach((value, key) => {
+      if (_element.layer.name.includes(key)) {
+        name = value;
+      }
+    });
+    if (!name) {
+      let defaultName = layerDefaultName.get('default');
+      name = defaultName ? defaultName : 'N/A';
+    }
+  } else {
+    name = getTraitName(selectedElement.name);
   }
-  if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
-    name = 'Brown';
-  }
+
   if (_element.layer.name.includes('Background')) {
     const layerName = _element.layer.name.slice(0, 10);
     const value = +(_element.layer.name.slice(10));
@@ -279,10 +287,6 @@ const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number,
 
   let afterLayerIndex = 0;
 
-  if (afterLayerName === 'Eyes') {
-    console.log('sss');
-  }
-
   let item = results.splice(layerIndex, 1);
 
   for (let i = 0; i < results.length; i++) {
@@ -358,6 +362,19 @@ const changeOrder = (results: Array<IDnaElement | null>) => {
   return results;
 };
 
+const generateDnaList = (): Set<string> => {
+  let dnaList = new Set<string>();
+  dnaList.add('');
+
+  let hashTable = getHashes();
+
+  hashTable.forEach((hash) => {
+    dnaList.add(hash);
+  });
+
+  return dnaList;
+};
+
 export const startCreating = async () => {
   let layerConfigIndex = 0;
   // количество созданных
@@ -368,7 +385,7 @@ export const startCreating = async () => {
   layerConfigurations.forEach((item) => {
     totalCount += item.count;
   });
-  for (let i = 2; i <= totalCount; i++) {
+  for (let i = 1; i <= totalCount; i++) {
     abstractedIndexes.push(i);
   }
   // new unique layers
@@ -425,8 +442,7 @@ export const startCreating = async () => {
       layersList.push(newLayer);
     });
 
-  let dnaList = new Set<string>();
-  dnaList.add('');
+  let dnaList = generateDnaList();
 
   while (layerConfigIndex < layerConfigurations.length) {
     let baseLayers = layersSetup(
@@ -454,7 +470,7 @@ export const startCreating = async () => {
         remove = [];
 
         let loadedElements: Promise<IImage | null>[] = [];
-        results = changeOrder(results);
+        // results = changeOrder(results);
 
         results.forEach((dna: any) => {
           if (dna) {
@@ -480,9 +496,12 @@ export const startCreating = async () => {
         dnaList.add(filterDNAOptions(newDna));
         editionCount++;
         abstractedIndexes.shift();
+        failCreateDnaCount = 0;
       } else {
         if (newDna === '') {
-          console.log('Not enough traits, rebuild!');
+          if (failCreateDnaCount % 999 === 0 && failCreateDnaCount > 0) {
+            console.log('Not enough traits, select next items!');
+          }
           failCreateDnaCount++;
         } else {
           console.log('DNA exists!');

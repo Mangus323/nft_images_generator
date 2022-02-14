@@ -1,5 +1,5 @@
 import { ILayer, ILayerConfigurationItem, ILayerElement } from './types';
-import { rarityDelimiter } from '../src/config';
+const rarityDelimiter = '#';
 import { getWeight } from '../src/weight_list';
 
 const fs = require('fs');
