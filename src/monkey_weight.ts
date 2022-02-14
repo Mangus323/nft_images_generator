@@ -22,7 +22,7 @@ const weight_list: any = {
   t166: 160,
   t333: 65,
   //body
-  t13: 1,
+  t13: 0,
   t15: 11,
   t16: 3,
   t17: 10,

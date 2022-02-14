@@ -58,7 +58,7 @@ const addAttributes = (_element: IImage | null) => {
     name = 'N/A';
   }
   if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
-    name = 'Black';
+    name = 'Brown';
   }
   if (_element.layer.name.includes('Background')) {
     const layerName = _element.layer.name.slice(0, 10);
@@ -186,8 +186,10 @@ const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min:
               return;
             }
           }
-          excludedLayer.push(element);
-          excludedLayerIndexes.push(layerIndex);
+          if (!(failCount > 1000 && failCount % 1000 === index && layerIndex === 0)) {
+            excludedLayer.push(element);
+            excludedLayerIndexes.push(layerIndex);
+          }
         }
       },
     );
@@ -245,33 +247,33 @@ const changeTraitId = (traitsIds: number[], index: number): number[] => {
 };
 
 
-const changeOrder = (results: Array<IDnaElement>) => {
-
-  for (let i = 0; i < results.length; i++) {
-    let name = results[i]?.selectedElement.name;
-    if (name) {
-      // повязки на глаза
-      let eyePatches = ['t84', 't85', 't86', 't89', 't90', 't94', 't98'];
-      if (eyePatches.includes(name)) {
-        results = changeOrderSingleTrait(results, i, 'Eyes');
-      }
-
-      if (name === 't59') {
-        results = changeOrderSingleTrait(results, i, 'Head');
-      }
-
-      // ear wear
-      let earWear = ['t100', 't101', 't102', 't104', 't105'];
-
-      if (earWear.includes(name)) {
-        results = changeOrderSingleTrait(results, i, 'Head');
-      }
-    }
-
-  }
-
-  return results;
-};
+// const changeOrder = (results: Array<IDnaElement>) => {
+//
+//   for (let i = 0; i < results.length; i++) {
+//     let name = results[i]?.selectedElement.name;
+//     if (name) {
+//       // повязки на глаза
+//       let eyePatches = ['t84', 't85', 't86', 't89', 't90', 't94', 't98'];
+//       if (eyePatches.includes(name)) {
+//         results = changeOrderSingleTrait(results, i, 'Eyes');
+//       }
+//
+//       if (name === 't59') {
+//         results = changeOrderSingleTrait(results, i, 'Head');
+//       }
+//
+//       // ear wear
+//       let earWear = ['t100', 't101', 't102', 't104', 't105'];
+//
+//       if (earWear.includes(name)) {
+//         results = changeOrderSingleTrait(results, i, 'Head');
+//       }
+//     }
+//
+//   }
+//
+//   return results;
+// };
 
 const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number, afterLayerName: string, afterItems: Array<string> = []) => {
 
@@ -298,63 +300,63 @@ const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number,
 };
 
 //monkey
-// const changeOrder = (results: Array<IDnaElement | null>) => {
-//   let earsToRight = false;
-//   let earsToEnd = false;
-//   // change layer order with t104
-//   if (results[7]?.selectedElement?.name === 't104') {
-//     const earsToEndHeads = [
-//       't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
-//       't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
-//     const isEarsToEnd = earsToEndHeads.find((item) => {
-//       return item === results[10]?.selectedElement?.name;
-//     });
-//
-//     const cloneEars = JSON.parse(JSON.stringify(results[7]));
-//     console.log('Changing order t104!');
-//     if (isEarsToEnd) {
-//       results[7] = null;
-//       results.push(cloneEars);
-//       earsToEnd = true;
-//     } else {
-//       results[7] = results[8];
-//       results[8] = cloneEars;
-//       earsToRight = true;
-//     }
-//   }
-//
-//   // change layer order with t103
-//   if (results[7]) {
-//     if (results[7].selectedElement?.name === 't103') {
-//       console.log('Changing order t103!');
-//       const cloneEars = JSON.parse(JSON.stringify(results[7]));
-//       results[7] = results[6];
-//       results[6] = cloneEars;
-//     }
-//   }
-//
-//   // повязки на глаза
-//   const eyeWear = ['t86', 't89', 't90', 't94'];
-//   if (eyeWear.find((item) => {
-//     return item === results[8]?.selectedElement?.name;
-//   })) {
-//     const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
-//     if (earsToRight) {
-//       results[6] = results[7];
-//       results[7] = cloneFaceMask;
-//     }
-//     if (earsToEnd) {
-//       results[6] = results[8];
-//       results[8] = cloneFaceMask;
-//     } else {
-//       results[6] = results[8];
-//       results[8] = results[7];
-//       results[7] = cloneFaceMask;
-//     }
-//   }
-//
-//   return results;
-// };
+const changeOrder = (results: Array<IDnaElement | null>) => {
+  let earsToRight = false;
+  let earsToEnd = false;
+  // change layer order with t104
+  if (results[7]?.selectedElement?.name === 't104') {
+    const earsToEndHeads = [
+      't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
+      't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
+    const isEarsToEnd = earsToEndHeads.find((item) => {
+      return item === results[10]?.selectedElement?.name;
+    });
+
+    const cloneEars = JSON.parse(JSON.stringify(results[7]));
+    console.log('Changing order t104!');
+    if (isEarsToEnd) {
+      results[7] = null;
+      results.push(cloneEars);
+      earsToEnd = true;
+    } else {
+      results[7] = results[8];
+      results[8] = cloneEars;
+      earsToRight = true;
+    }
+  }
+
+  // change layer order with t103
+  if (results[7]) {
+    if (results[7].selectedElement?.name === 't103') {
+      console.log('Changing order t103!');
+      const cloneEars = JSON.parse(JSON.stringify(results[7]));
+      results[7] = results[6];
+      results[6] = cloneEars;
+    }
+  }
+
+  // повязки на глаза
+  const eyeWear = ['t86', 't89', 't90', 't94'];
+  if (eyeWear.find((item) => {
+    return item === results[8]?.selectedElement?.name;
+  })) {
+    const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
+    if (earsToRight) {
+      results[6] = results[7];
+      results[7] = cloneFaceMask;
+    }
+    if (earsToEnd) {
+      results[6] = results[8];
+      results[8] = cloneFaceMask;
+    } else {
+      results[6] = results[8];
+      results[8] = results[7];
+      results[7] = cloneFaceMask;
+    }
+  }
+
+  return results;
+};
 
 export const startCreating = async () => {
   let layerConfigIndex = 0;
@@ -366,7 +368,7 @@ export const startCreating = async () => {
   layerConfigurations.forEach((item) => {
     totalCount += item.count;
   });
-  for (let i = 1; i <= totalCount; i++) {
+  for (let i = 2; i <= totalCount; i++) {
     abstractedIndexes.push(i);
   }
   // new unique layers
@@ -443,7 +445,7 @@ export const startCreating = async () => {
       );
       if (isDnaUnique(dnaList, newDna)) {
         failCreateDnaCount = 0;
-        let results = constructLayerToDna(newDna, baseLayers, layersList);
+        let results: any = constructLayerToDna(newDna, baseLayers, layersList);
 
         // remove used traits from layer
         remove.forEach((item) => {
@@ -454,7 +456,7 @@ export const startCreating = async () => {
         let loadedElements: Promise<IImage | null>[] = [];
         results = changeOrder(results);
 
-        results.forEach((dna) => {
+        results.forEach((dna: any) => {
           if (dna) {
             loadedElements.push(loadLayerImg(dna));
           }
