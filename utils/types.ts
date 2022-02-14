@@ -35,7 +35,7 @@ export interface IDnaElement {
   name: string;
   blend: any;
   opacity: any;
-  selectedElement: ILayerElement | undefined;
+  selectedElement: ILayerElement;
 }
 
 export interface IImage {

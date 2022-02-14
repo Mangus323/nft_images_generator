@@ -80,19 +80,23 @@ const addAttributes = (_element: IImage | null) => {
   });
 };
 
-const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer[]): Array<IDnaElement | null> => {
+const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer[]): Array<IDnaElement> => {
   const dna: IDnaElement[] = [];
   baseLayers.forEach((layer, index) => {
     if (index > 1) return;
     let selectedElement = layer.elements.find(
       (e) => e.id === cleanDna(_dna.split(DNA_DELIMITER)[index]),
     );
-    dna.push({
-      name: layer.name,
-      blend: layer.blend,
-      opacity: layer.opacity,
-      selectedElement: selectedElement,
-    });
+    if (selectedElement) {
+      dna.push({
+        name: layer.name,
+        blend: layer.blend,
+        opacity: layer.opacity,
+        selectedElement: selectedElement,
+      });
+    } else {
+      console.log('ERROR NOT FOUND SELECTED ELEMENT: ' + _dna);
+    }
   });
   layersList.forEach((layer, index) => {
     if (index < 2) return;
@@ -150,7 +154,7 @@ const isDnaUnique = (dnaList: Set<string> = new Set(), dna = ''): boolean => {
   return !dnaList.has(_filteredDNA);
 };
 
-const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min: number): string => {
+const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min: number, failCount: number): string => {
   remove = [];
   let randNum: string[] = [];
   let dnaArray: ILayerElement[] = [];
@@ -158,13 +162,9 @@ const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min:
   let traitsIds = getTraitsIds(max);
   baseLayers.forEach((layer, index) => {
       if (index > 1) return;
-      const name = layer.elements[0].filename.split('#')[0];
-      blockedTraits.push(...getExcludes(name));
+      blockedTraits.push(...getExcludes(layer.elements[0].name));
 
-      return randNum.push(
-        `${layer.elements[0].id}:${layer.elements[0].filename}${
-          layer.bypassDNA ? '?bypassDNA=true' : ''
-        }`,
+      return randNum.push(`${layer.elements[0].id}:${layer.elements[0].filename}`,
       );
     },
   );
@@ -186,8 +186,10 @@ const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min:
               return;
             }
           }
-          excludedLayer.push(element);
-          excludedLayerIndexes.push(layerIndex);
+          if (!(failCount > 1000 && failCount % 1000 === index && layerIndex === 0)) {
+            excludedLayer.push(element);
+            excludedLayerIndexes.push(layerIndex);
+          }
         }
       },
     );
@@ -196,10 +198,9 @@ const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min:
     }
     // set layer element
     for (let i = 0; i < excludedLayer.length; i++) {
-      const name = excludedLayer[i].filename.split('#')[0];
-      if (!blockedTraits.includes(name)) {
+      if (!blockedTraits.includes(excludedLayer[i].name)) {
         const layersListIndex = excludedLayerIndexes[i];
-        blockedTraits.push(...getExcludes(name));
+        blockedTraits.push(...getExcludes(excludedLayer[i].name));
 
         remove.push({
           index: index,
@@ -207,19 +208,13 @@ const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min:
         });
 
         dnaArray.push(excludedLayer[i]);
-        randNum[index] =
-          `${excludedLayer[i].id}:${excludedLayer[i].filename}${
-            layer.bypassDNA ? '?bypassDNA=true' : ''
-          }`;
+        randNum[index] = `${excludedLayer[i].id}:${excludedLayer[i].filename}`;
         return;
       }
     }
 
     // add empty element
-    randNum[index] =
-      `${baseLayers[index].elements[0].id}:${baseLayers[index].elements[0].filename}${
-        layer.bypassDNA ? '?bypassDNA=true' : ''
-      }`;
+    randNum[index] = `${baseLayers[index].elements[0].id}:${baseLayers[index].elements[0].filename}`;
   });
   if (!dnaArray[1].path.includes('Body')) {
     return '';
@@ -251,6 +246,60 @@ const changeTraitId = (traitsIds: number[], index: number): number[] => {
   }
 };
 
+
+// const changeOrder = (results: Array<IDnaElement>) => {
+//
+//   for (let i = 0; i < results.length; i++) {
+//     let name = results[i]?.selectedElement.name;
+//     if (name) {
+//       // повязки на глаза
+//       let eyePatches = ['t84', 't85', 't86', 't89', 't90', 't94', 't98'];
+//       if (eyePatches.includes(name)) {
+//         results = changeOrderSingleTrait(results, i, 'Eyes');
+//       }
+//
+//       if (name === 't59') {
+//         results = changeOrderSingleTrait(results, i, 'Head');
+//       }
+//
+//       // ear wear
+//       let earWear = ['t100', 't101', 't102', 't104', 't105'];
+//
+//       if (earWear.includes(name)) {
+//         results = changeOrderSingleTrait(results, i, 'Head');
+//       }
+//     }
+//
+//   }
+//
+//   return results;
+// };
+
+const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number, afterLayerName: string, afterItems: Array<string> = []) => {
+
+  let afterLayerIndex = 0;
+
+  if (afterLayerName === 'Eyes') {
+    console.log('sss');
+  }
+
+  let item = results.splice(layerIndex, 1);
+
+  for (let i = 0; i < results.length; i++) {
+    if (results[i].name === afterLayerName) {
+
+      if (afterItems.length === 0 || afterItems.includes(results[i].selectedElement.name)) {
+        afterLayerIndex = i;
+        break;
+      }
+    }
+  }
+
+  results.splice(afterLayerIndex + 1, 0, ...item);
+  return results;
+};
+
+//monkey
 const changeOrder = (results: Array<IDnaElement | null>) => {
   let earsToRight = false;
   let earsToEnd = false;
@@ -313,14 +362,14 @@ export const startCreating = async () => {
   let layerConfigIndex = 0;
   // количество созданных
   let editionCount = 1;
-  let failedCount = 0;
+  let failedUniqueDnaCount = 0;
   let abstractedIndexes: number[] = [];
   let totalCount = 1;
   layerConfigurations.forEach((item) => {
     totalCount += item.count;
   });
-  for (let i = 1; i <= totalCount; i++) {
-    abstractedIndexes.push(i + 1);
+  for (let i = 2; i <= totalCount; i++) {
+    abstractedIndexes.push(i);
   }
   // new unique layers
   let layersList: ILayer[] = [];
@@ -384,16 +433,19 @@ export const startCreating = async () => {
       layerConfigurations[layerConfigIndex].layersOrder,
     );
 
-    let currentLayer = 1;
-    while (currentLayer <= layerConfigurations[layerConfigIndex].count) {
+    let currentLayerItemsCount = 1;
+    let failCreateDnaCount = 0;
+    while (currentLayerItemsCount <= layerConfigurations[layerConfigIndex].count) {
       let newDna = createDna(
         baseLayers,
         layersList,
         layerConfigurations[layerConfigIndex].maxTraits,
         layerConfigurations[layerConfigIndex].minTraits,
+        failCreateDnaCount,
       );
       if (isDnaUnique(dnaList, newDna)) {
-        let results = constructLayerToDna(newDna, baseLayers, layersList);
+        failCreateDnaCount = 0;
+        let results: any = constructLayerToDna(newDna, baseLayers, layersList);
 
         // remove used traits from layer
         remove.forEach((item) => {
@@ -404,7 +456,7 @@ export const startCreating = async () => {
         let loadedElements: Promise<IImage | null>[] = [];
         results = changeOrder(results);
 
-        results.forEach((dna) => {
+        results.forEach((dna: any) => {
           if (dna) {
             loadedElements.push(loadLayerImg(dna));
           }
@@ -431,11 +483,12 @@ export const startCreating = async () => {
       } else {
         if (newDna === '') {
           console.log('Not enough traits, rebuild!');
+          failCreateDnaCount++;
         } else {
           console.log('DNA exists!');
-          failedCount++;
+          failedUniqueDnaCount++;
         }
-        if (failedCount >= uniqueDnaTorrance) {
+        if (failedUniqueDnaCount >= uniqueDnaTorrance) {
           console.log(
             `You need more layers or elements to grow your edition to ${layerConfigurations[layerConfigIndex].count} artworks!`,
           );
@@ -460,11 +513,11 @@ export const startCreating = async () => {
             newLayersList.push(newLayer);
           });
           layersList = newLayersList;
-          failedCount = 0;
+          failedUniqueDnaCount = 0;
         }
-        currentLayer--;
+        currentLayerItemsCount--;
       }
-      currentLayer++;
+      currentLayerItemsCount++;
     }
     layerConfigIndex++;
   }

@@ -86,8 +86,9 @@ const saveSingleMetaData = (number: number) => {
 };
 
 async function createSingle() {
-  let number = 8;
+  let number = 1;
   const baseList = 'b1, base, ';
+  const list = baseList + 't8, t29, t55, t655';
   let layersList: ILayer[] = [];
 
   // @ts-ignore
@@ -100,8 +101,6 @@ async function createSingle() {
     }
     layersList.push(newLayer);
   });
-
-  const list = baseList + 't163, t80, t117, t97, t152, t26';
 
   const array = list.split(', ');
   let results: IDnaElement[] = [];
