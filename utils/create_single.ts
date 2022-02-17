@@ -1,27 +1,25 @@
-import { IDnaElement, IImage, ILayer } from './types';
-import { baseUri, description, extraMetadata, layerConfigurations, namePrefix } from '../src/config';
-import sha1 from 'sha1';
+import { IDnaElement, IImage, ILayer, IMetadata } from './types';
+import { baseUri, description, layerConfigurations, layerDefaultName, namePrefix } from '../src/config';
 import { drawElement, loadLayerImg, saveSingleImage } from './image';
 import { layersSetup } from './fs';
 import { getTraitName } from '../src/names_list';
+import { dnaToHash } from '../src/dna';
 
 const fs = require('fs');
 const basePath = process.cwd();
 const buildDir = `${basePath}/build`;
 const DNA_DELIMITER = '-';
-let metadataList: any[] = [];
+let metadataList: IMetadata[] = [];
 let attributesList: any[] = [];
 
 (() => {
   createSingle();
 })();
 
-function createSingleDna(dnaArray: any[]) {
-  let dna: any[] = [];
+function createSingleDna(dnaArray: IDnaElement[]) {
+  let dna: string[] = [];
   dnaArray.forEach((layer) => {
-    dna.push(
-      `${layer.selectedElement.id}:${layer.selectedElement.filename}`,
-    );
+    dna.push(layer.selectedElement.filename);
   });
   return dna.join(DNA_DELIMITER);
 }
@@ -34,13 +32,21 @@ const addAttributes = (_element: IImage | null) => {
     return;
   }
 
-  let name = getTraitName(selectedElement.name);
-  if (selectedElement.name === 'empty' && !(_element.layer.name.includes('Mouth'))) {
-    name = 'N/A';
+  let name = '';
+  if (selectedElement.name === 'empty') {
+    layerDefaultName.forEach((value, key) => {
+      if (_element.layer.name.includes(key)) {
+        name = value;
+      }
+    });
+    if (!name) {
+      let defaultName = layerDefaultName.get('default');
+      name = defaultName ? defaultName : 'N/A';
+    }
+  } else {
+    name = getTraitName(selectedElement.name);
   }
-  if (selectedElement.name === 'empty' && (_element.layer.name.includes('Eyes'))) {
-    name = 'Brown';
-  }
+
   if (_element.layer.name.includes('Background')) {
     const layerName = _element.layer.name.slice(0, 10);
     const value = +(_element.layer.name.slice(10));
@@ -61,18 +67,17 @@ const addAttributes = (_element: IImage | null) => {
   });
 };
 
-const addMetadata = (_dna: string, _edition: number) => {
+const addMetadata = (dna: string, edition: number) => {
   let dateTime = Date.now();
   let tempMetadata = {
-    name: `${namePrefix} #${_edition}`,
+    name: `${namePrefix} #${edition}`,
     description: description,
-    image: `${baseUri}/${_edition}.png`,
-    dna: sha1(_dna),
-    edition: _edition,
+    image: `${baseUri}/${edition}.png`,
+    dna: dnaToHash(dna),
+    edition: edition,
     date: dateTime,
-    ...extraMetadata,
     attributes: attributesList,
-    compiler: 'HashLips Art Engine',
+    compiler: 'NFT images generator',
   };
   metadataList.push(tempMetadata);
 };
@@ -86,13 +91,13 @@ const saveSingleMetaData = (number: number) => {
 };
 
 async function createSingle() {
-  let number = 1;
+  // change this
+  const number = 1;
   const baseList = 'b1, base, ';
-  const list = baseList + 't8, t29, t55, t655';
-  let layersList: ILayer[] = [];
+  const list = baseList + 't8';
 
-  // @ts-ignore
-  layersSetup(layerConfigurations[`${Number(baseList[1]) - 1}`].layersOrder).forEach((layer) => {
+  let layersList: ILayer[] = [];
+  layersSetup(layerConfigurations[Number(baseList[1]) - 1].layersOrder).forEach((layer) => {
     let newLayer = JSON.parse(JSON.stringify(layer));
     newLayer.elements = [];
     for (let i = 0; i < layer.elements.length; i++) {
@@ -120,6 +125,24 @@ async function createSingle() {
       });
     });
   }
+  // empty elements
+  layersList.forEach((layer) => {
+    let isLayer = false;
+    results.forEach((dna) => {
+      if (layer.name === dna.name) {
+        isLayer = true;
+      }
+    });
+    if (!isLayer) {
+      results.push({
+        name: layer.name,
+        selectedElement: layer.elements[0],
+        blend: null,
+        opacity: 1,
+      });
+    }
+  });
+
   let dna = createSingleDna(results);
   let loadedElements: Promise<IImage | null>[] = [];
   results.forEach((dna) => {
@@ -137,9 +160,7 @@ async function createSingle() {
     addMetadata(dna, number);
     saveSingleMetaData(number);
     console.log(
-      `Created single image with number ${number} and DNA: ${sha1(
-        dna,
-      )}`,
+      `Created single image with number ${number} and DNA: ${dnaToHash(dna)}`,
     );
   });
 }

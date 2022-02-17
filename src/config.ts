@@ -147,15 +147,19 @@ const layerConfigurations: ILayerConfigurationItem[] = [
   },
 ];
 
+// indexes for layers which may not be
+const optionalLayers = [4, 5, 6, 7, 8, 9, 10];
+
 const layerDefaultName = new Map<string, string>();
-layerDefaultName.set('Eyes', 'Black');
+layerDefaultName.set('Eyes', 'Brown');
 layerDefaultName.set('Mouth', 'Frown');
 layerDefaultName.set('default', 'N/A');
 
+// increase build speed, but takes more RAM and CPU usage
 const caching = true;
 
 //used for csv files
-const imageName = 'Hyena';
+const imageName = 'Elephant';
 
 const format = {
   width: 2048,
@@ -163,19 +167,17 @@ const format = {
   smoothing: false,
 };
 
-const extraMetadata = {};
-
 const uniqueDnaTorrance = 100000;
 
 export {
-  format,
   baseUri,
   description,
-  uniqueDnaTorrance,
   layerConfigurations,
-  extraMetadata,
   namePrefix,
+  optionalLayers,
   layerDefaultName,
   caching,
-  imageName
+  imageName,
+  format,
+  uniqueDnaTorrance,
 };

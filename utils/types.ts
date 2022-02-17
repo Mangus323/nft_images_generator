@@ -21,7 +21,7 @@ export interface ILayer {
   bypassDNA: any;
   blend: any;
   elements: ILayerElement[];
-  name: any;
+  name: string;
   id: number;
   opacity: any;
 }
@@ -53,5 +53,16 @@ export interface IAttribute {
   value: number;
   weight: number;
   name: string;
+}
+
+export interface IMetadata {
+  name: string;
+  description: string;
+  image: string;
+  dna: string;
+  edition: number;
+  date: number;
+  attributes: any[];
+  compiler: string;
 }
 

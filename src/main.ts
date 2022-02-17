@@ -1,51 +1,35 @@
-import { IDnaElement, IImage, ILayer, ILayerElement, IRemove } from '../utils/types';
+import { IAttribute, IDnaElement, IImage, ILayer, ILayerElement, IMetadata } from '../utils/types';
 import {
   baseUri,
   description,
   uniqueDnaTorrance,
   layerConfigurations,
-  extraMetadata,
   namePrefix, layerDefaultName,
 } from './config';
-import { getExcludes } from './exclude_list';
 import { getTraitName } from './names_list';
 import shuffle from '../utils/shuffle';
-import sha1 from 'sha1';
 import { drawElement, loadLayerImg, saveImage } from '../utils/image';
 import { layersSetup, saveMetaDataSingleFile, writeMetaData } from '../utils/fs';
-import { getHashes } from '../utils/generate_hash';
+import { cleanDna, createDna, dnaToHash, generateDnaList, isDnaUnique } from './dna';
 
 const DNA_DELIMITER = '-';
 
-let metadataList: any[] = [];
-let attributesList: any[] = [];
-let remove: IRemove[] = [];
-const emptyElements: any[] = [];
-
-
-const cleanDna = (_str: string) => {
-  const withoutOptions = removeQueryStrings(_str);
-  return Number(withoutOptions.split(':').shift());
-};
-
-const addMetadata = (_dna: string, _edition: number) => {
+const addMetadata = (dna: string, edition: number, metadataList: IMetadata[], attributesList: IAttribute[]) => {
   let dateTime = Date.now();
   let tempMetadata = {
-    name: `${namePrefix} #${_edition}`,
+    name: `${namePrefix} #${edition}`,
     description: description,
-    image: `${baseUri}/${_edition}.png`,
-    dna: sha1(_dna),
-    edition: _edition,
+    image: `${baseUri}/${edition}.png`,
+    dna: dnaToHash(dna),
+    edition: edition,
     date: dateTime,
-    ...extraMetadata,
     attributes: attributesList,
-    compiler: 'HashLips Art Engine',
+    compiler: 'NFT images generator',
   };
   metadataList.push(tempMetadata);
-  attributesList = [];
 };
 
-const addAttributes = (_element: IImage | null) => {
+const addAttributes = (_element: IImage | null, attributesList: IAttribute[]) => {
   if (!_element) return;
   let selectedElement = _element.layer.selectedElement;
   if (!selectedElement) return;
@@ -92,8 +76,9 @@ const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer
   const dna: IDnaElement[] = [];
   baseLayers.forEach((layer, index) => {
     if (index > 1) return;
+    const id = cleanDna(_dna.split(DNA_DELIMITER)[index]);
     let selectedElement = layer.elements.find(
-      (e) => e.id === cleanDna(_dna.split(DNA_DELIMITER)[index]),
+      (e) => e.id === id,
     );
     if (selectedElement) {
       dna.push({
@@ -130,128 +115,6 @@ const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer
     });
   });
   return dna;
-};
-
-const filterDNAOptions = (_dna: string) => {
-  const dnaItems = _dna.split(DNA_DELIMITER);
-  const filteredDNA = dnaItems.filter((element) => {
-    const query = /(\?.*$)/;
-    const querystring = query.exec(element);
-    if (!querystring) {
-      return true;
-    }
-    const options = querystring[1].split('&').reduce((r, setting) => {
-      const keyPairs = setting.split('=');
-      return { ...r, [keyPairs[0]]: keyPairs[1] };
-    }, []);
-
-    // @ts-ignore
-    return options.bypassDNA;
-  });
-
-  return filteredDNA.join(DNA_DELIMITER);
-};
-
-const removeQueryStrings = (_dna: string) => {
-  const query = /(\?.*$)/;
-  return _dna.replace(query, '');
-};
-
-const isDnaUnique = (dnaList: Set<string> = new Set(), dna = ''): boolean => {
-  const _filteredDNA = filterDNAOptions(dna);
-  return !dnaList.has(_filteredDNA);
-};
-
-const createDna = (baseLayers: ILayer[], layersList: ILayer[], max: number, min: number, failCount: number): string => {
-  remove = [];
-  let randNum: string[] = [];
-  let dnaArray: ILayerElement[] = [];
-  let blockedTraits: string[] = [];
-  let traitsIds = getTraitsIds(max);
-  baseLayers.forEach((layer, index) => {
-      if (index > 1) return;
-      blockedTraits.push(...getExcludes(layer.elements[0].name));
-
-      return randNum.push(`${layer.elements[0].id}:${layer.elements[0].filename}`,
-      );
-    },
-  );
-
-  const randSort = [2, 3, ...shuffle([4, 5, 6, 7, 8, 9, 10])];
-
-  randSort.forEach((index) => {
-    let layer = layersList[index];
-    let excludedLayer: ILayerElement[] = [];
-    let excludedLayerIndexes: number[] = [];
-
-    // delegate layer elements
-    layer.elements.forEach((element, layerIndex: number) => {
-        if (!traitsIds.includes(index) && index > 2) return;
-        if (!blockedTraits.includes(element.name)) {
-          const blockedByTrait = getExcludes(element.name);
-          for (let i = 0; i < dnaArray.length; i++) {
-            if (blockedByTrait.includes(dnaArray[i].name)) {
-              return;
-            }
-          }
-          if (!(failCount > 1000 && failCount % 1000 === index && layerIndex === 0)) {
-            excludedLayer.push(element);
-            excludedLayerIndexes.push(layerIndex);
-          }
-        }
-      },
-    );
-    if (traitsIds.includes(index) && excludedLayer.length === 0) {
-      traitsIds = changeTraitId(traitsIds, index);
-    }
-    // set layer element
-    for (let i = 0; i < excludedLayer.length; i++) {
-      if (!blockedTraits.includes(excludedLayer[i].name)) {
-        const layersListIndex = excludedLayerIndexes[i];
-        blockedTraits.push(...getExcludes(excludedLayer[i].name));
-
-        remove.push({
-          index: index,
-          itemIndex: layersListIndex,
-        });
-
-        dnaArray.push(excludedLayer[i]);
-        randNum[index] = `${excludedLayer[i].id}:${excludedLayer[i].filename}`;
-        return;
-      }
-    }
-
-    // add empty element
-    randNum[index] = `${baseLayers[index].elements[0].id}:${baseLayers[index].elements[0].filename}`;
-  });
-  if (!dnaArray[1].path.includes('Body')) {
-    return '';
-  }
-  // проверка на минимальное ( - 2 это базовые)
-  if (dnaArray.length - 2 < min) {
-    return '';
-  }
-
-  return randNum.join(DNA_DELIMITER);
-};
-
-
-const getTraitsIds = (count: number) => {
-  let traitsIds = [4, 5, 6, 7, 8, 9];
-  let returnedTraitsIds = [2, 3];
-  for (let i = 0; i < count; i++) {
-    const index = Math.floor(Math.random() * (traitsIds.length));
-    returnedTraitsIds.push(...traitsIds.splice(index, 1));
-  }
-  return returnedTraitsIds;
-};
-
-const changeTraitId = (traitsIds: number[], index: number): number[] => {
-  if (traitsIds.includes(index)) {
-    return changeTraitId(traitsIds, index + 1);
-  } else {
-    return [...traitsIds, index];
-  }
 };
 
 
@@ -362,24 +225,7 @@ const changeOrder = (results: Array<IDnaElement | null>) => {
   return results;
 };
 
-const generateDnaList = (): Set<string> => {
-  let dnaList = new Set<string>();
-  dnaList.add('');
-
-  let hashTable = getHashes();
-
-  hashTable.forEach((hash) => {
-    dnaList.add(hash);
-  });
-
-  return dnaList;
-};
-
-export const startCreating = async () => {
-  let layerConfigIndex = 0;
-  // количество созданных
-  let editionCount = 1;
-  let failedUniqueDnaCount = 0;
+const getAbstractedIndexes = (): number[] => {
   let abstractedIndexes: number[] = [];
   let totalCount = 1;
   layerConfigurations.forEach((item) => {
@@ -388,6 +234,18 @@ export const startCreating = async () => {
   for (let i = 1; i <= totalCount; i++) {
     abstractedIndexes.push(i);
   }
+  return abstractedIndexes;
+};
+
+export const startCreating = async () => {
+  let metadataList: IMetadata[] = [];
+  let attributesList: IAttribute[] = [];
+
+  let layerConfigIndex = 0;
+  let editionCount = 1;
+  let failedUniqueDnaCount = 0;
+  let abstractedIndexes = getAbstractedIndexes();
+
   // new unique layers
   let layersList: ILayer[] = [];
   layersSetup(layerConfigurations[0].layersOrder)
@@ -407,7 +265,7 @@ export const startCreating = async () => {
       let step = steps[0];
       let stepIndex = 0;
 
-      layer.elements = layer.elements.sort((a: any, b: any) => {
+      layer.elements = layer.elements.sort((a, b) => {
         return a.weight - b.weight;
       });
       const lastEmpty = layer.elements[layer.elements.length - 1].name === 'empty';
@@ -415,7 +273,6 @@ export const startCreating = async () => {
       for (let i = 0; i < layer.elements.length; i++) {
         let newLayerElement: ILayerElement = JSON.parse(JSON.stringify(layer.elements[i]));
         if (newLayerElement.name === 'empty') {
-          emptyElements.push(newLayerElement);
           continue;
         }
 
@@ -442,8 +299,7 @@ export const startCreating = async () => {
       layersList.push(newLayer);
     });
 
-  let dnaList = generateDnaList();
-
+  let dnaHashList = generateDnaList();
   while (layerConfigIndex < layerConfigurations.length) {
     let baseLayers = layersSetup(
       layerConfigurations[layerConfigIndex].layersOrder,
@@ -452,27 +308,27 @@ export const startCreating = async () => {
     let currentLayerItemsCount = 1;
     let failCreateDnaCount = 0;
     while (currentLayerItemsCount <= layerConfigurations[layerConfigIndex].count) {
-      let newDna = createDna(
+      let { dna: newDna, removeObject } = createDna(
         baseLayers,
         layersList,
         layerConfigurations[layerConfigIndex].maxTraits,
         layerConfigurations[layerConfigIndex].minTraits,
         failCreateDnaCount,
       );
-      if (isDnaUnique(dnaList, newDna)) {
+      let dnaHash = dnaToHash(newDna);
+      if (isDnaUnique(dnaHashList, newDna)) {
         failCreateDnaCount = 0;
-        let results: any = constructLayerToDna(newDna, baseLayers, layersList);
+        let results = constructLayerToDna(newDna, baseLayers, layersList);
 
         // remove used traits from layer
-        remove.forEach((item) => {
+        removeObject.forEach((item) => {
           layersList[item.index].elements.splice(item.itemIndex, 1);
         });
-        remove = [];
 
         let loadedElements: Promise<IImage | null>[] = [];
         // results = changeOrder(results);
 
-        results.forEach((dna: any) => {
+        results.forEach((dna) => {
           if (dna) {
             loadedElements.push(loadLayerImg(dna));
           }
@@ -481,19 +337,18 @@ export const startCreating = async () => {
         await Promise.all(loadedElements).then((renderObjectArray) => {
           renderObjectArray.forEach((renderObject) => {
             drawElement(renderObject);
-            addAttributes(renderObject);
+            addAttributes(renderObject, attributesList);
           });
           saveImage(abstractedIndexes[0]);
-          addMetadata(newDna, abstractedIndexes[0]);
+          addMetadata(newDna, abstractedIndexes[0], metadataList, attributesList);
+          attributesList = [];
           saveMetaDataSingleFile(abstractedIndexes[0], metadataList);
           console.log(
-            `Created edition: ${abstractedIndexes[0]}, with DNA: ${sha1(
-              newDna,
-            )}`,
+            `Created edition: ${abstractedIndexes[0]}, with DNA: ${dnaHash}`,
           );
         });
 
-        dnaList.add(filterDNAOptions(newDna));
+        dnaHashList.add(dnaHash);
         editionCount++;
         abstractedIndexes.shift();
         failCreateDnaCount = 0;
