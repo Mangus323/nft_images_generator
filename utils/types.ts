@@ -48,6 +48,10 @@ export interface IJSONImage {
   attributes: IAttribute[];
 }
 
+export interface ICollectionItem extends IJSONImage {
+  collectionName: string;
+}
+
 export interface IAttribute {
   trait_type: string;
   value: number;

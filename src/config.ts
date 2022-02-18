@@ -95,7 +95,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
     ],
   }, {
     count: 165,
-    maxTraits: 4,
+    maxTraits: 3,
     minTraits: 3,
     layersOrder: [
       { name: 'Background6' },
@@ -112,7 +112,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
     ],
   }, {
     count: 235,
-    maxTraits: 3,
+    maxTraits: 2,
     minTraits: 2,
     layersOrder: [
       { name: 'Background7' },
@@ -151,7 +151,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
 const optionalLayers = [4, 5, 6, 7, 8, 9, 10];
 
 const layerDefaultName = new Map<string, string>();
-layerDefaultName.set('Eyes', 'Brown');
+layerDefaultName.set('Eyes', 'Light Brown');
 layerDefaultName.set('Mouth', 'Frown');
 layerDefaultName.set('default', 'N/A');
 
@@ -159,7 +159,7 @@ layerDefaultName.set('default', 'N/A');
 const caching = true;
 
 //used for csv files
-const imageName = 'Elephant';
+const imageName = 'Lion';
 
 const format = {
   width: 2048,

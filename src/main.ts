@@ -11,6 +11,7 @@ import shuffle from '../utils/shuffle';
 import { drawElement, loadLayerImg, saveImage } from '../utils/image';
 import { layersSetup, saveMetaDataSingleFile, writeMetaData } from '../utils/fs';
 import { cleanDna, createDna, dnaToHash, generateDnaList, isDnaUnique } from './dna';
+import { containInCollection } from '../utils/collection_exclude';
 
 const DNA_DELIMITER = '-';
 
@@ -319,6 +320,8 @@ export const startCreating = async () => {
       if (isDnaUnique(dnaHashList, newDna)) {
         failCreateDnaCount = 0;
         let results = constructLayerToDna(newDna, baseLayers, layersList);
+
+        containInCollection(results);
 
         // remove used traits from layer
         removeObject.forEach((item) => {

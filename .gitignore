@@ -51,6 +51,7 @@ build/Release
 
 build/
 layers/
+collections/
 csv/
 dist/
 node_modules/

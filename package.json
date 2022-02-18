@@ -15,7 +15,8 @@
     "build": "ts-node index.ts",
     "csv": "ts-node src/csv.ts",
     "single": "ts-node utils/create_single.ts",
-    "generate_metadata": "node utils/generate_metadata.js"
+    "generate_metadata": "node utils/generate_metadata.js",
+    "s": "ts-node utils/collection_exclude.ts"
   },
   "author": "Andrey cvetkov (Mangus232)",
   "license": "MIT",
