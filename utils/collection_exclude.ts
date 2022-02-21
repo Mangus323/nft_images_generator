@@ -1,6 +1,5 @@
-import { ICollectionItem, IDnaElement, IJSONImage } from './types';
+import { ICollectionItem, IDnaElement } from './types';
 import fs from 'fs';
-import { match } from 'assert';
 
 const basePath = process.cwd();
 const rawData: ICollectionItem[] = [];

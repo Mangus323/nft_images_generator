@@ -159,7 +159,7 @@ layerDefaultName.set('default', 'N/A');
 const caching = true;
 
 //used for csv files
-const imageName = 'Lion';
+const imageName = 'Zebra';
 
 const format = {
   width: 2048,

@@ -321,8 +321,6 @@ export const startCreating = async () => {
         failCreateDnaCount = 0;
         let results = constructLayerToDna(newDna, baseLayers, layersList);
 
-        containInCollection(results);
-
         // remove used traits from layer
         removeObject.forEach((item) => {
           layersList[item.index].elements.splice(item.itemIndex, 1);
