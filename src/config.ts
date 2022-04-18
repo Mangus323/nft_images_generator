@@ -17,7 +17,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -35,7 +35,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -53,7 +53,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -70,7 +70,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -87,7 +87,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -104,7 +104,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -121,7 +121,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -138,7 +138,7 @@ const layerConfigurations: ILayerConfigurationItem[] = [
       { name: 'Body' },
       { name: 'Mouth' },
       { name: 'Eyes' },
-      { name: 'Face Masks' },
+      { name: 'Face' },
       { name: 'Ears' },
       { name: 'Eye Wear' },
       { name: 'Nose Wear' },
@@ -151,7 +151,11 @@ const layerConfigurations: ILayerConfigurationItem[] = [
 const optionalLayers = [4, 5, 6, 7, 8, 9, 10];
 
 const layerDefaultName = new Map<string, string>();
-layerDefaultName.set('Eyes', 'Light Brown');
+
+// lion  Light Brown
+// rhino koala cheetah warthog elephant  brown
+// panda hyena  black
+layerDefaultName.set('Eyes', 'Brown');
 layerDefaultName.set('Mouth', 'Frown');
 layerDefaultName.set('default', 'N/A');
 
@@ -159,7 +163,7 @@ layerDefaultName.set('default', 'N/A');
 const caching = true;
 
 //used for csv files
-const imageName = 'Zebra';
+const imageName = 'Monkey';
 
 const format = {
   width: 2048,

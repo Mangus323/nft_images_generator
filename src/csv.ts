@@ -7,6 +7,6 @@ import { imageName } from './config';
 (() => {
     generateCSV(imageName);
     generateRarity();
-    generateUsedTraits()
-    generateHash();
+    // generateUsedTraits()
+    // generateHash();
 })();

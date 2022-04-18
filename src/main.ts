@@ -12,6 +12,7 @@ import { drawElement, loadLayerImg, saveImage } from '../utils/image';
 import { layersSetup, saveMetaDataSingleFile, writeMetaData } from '../utils/fs';
 import { cleanDna, createDna, dnaToHash, generateDnaList, isDnaUnique } from './dna';
 import { containInCollection } from '../utils/collection_exclude';
+import { changeOrder } from './change_layer';
 
 const DNA_DELIMITER = '-';
 
@@ -119,36 +120,7 @@ const constructLayerToDna = (_dna = '', baseLayers: ILayer[], layersList: ILayer
 };
 
 
-// const changeOrder = (results: Array<IDnaElement>) => {
-//
-//   for (let i = 0; i < results.length; i++) {
-//     let name = results[i]?.selectedElement.name;
-//     if (name) {
-//       // повязки на глаза
-//       let eyePatches = ['t84', 't85', 't86', 't89', 't90', 't94', 't98'];
-//       if (eyePatches.includes(name)) {
-//         results = changeOrderSingleTrait(results, i, 'Eyes');
-//       }
-//
-//       if (name === 't59') {
-//         results = changeOrderSingleTrait(results, i, 'Head');
-//       }
-//
-//       // ear wear
-//       let earWear = ['t100', 't101', 't102', 't104', 't105'];
-//
-//       if (earWear.includes(name)) {
-//         results = changeOrderSingleTrait(results, i, 'Head');
-//       }
-//     }
-//
-//   }
-//
-//   return results;
-// };
-
-const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number, afterLayerName: string, afterItems: Array<string> = []) => {
-
+const changeOrderSingleTraitLayer = (results: Array<IDnaElement>, layerIndex: number, afterLayerName: string, afterItems: Array<string> = []) => {
   let afterLayerIndex = 0;
 
   let item = results.splice(layerIndex, 1);
@@ -168,63 +140,63 @@ const changeOrderSingleTrait = (results: Array<IDnaElement>, layerIndex: number,
 };
 
 //monkey
-const changeOrder = (results: Array<IDnaElement | null>) => {
-  let earsToRight = false;
-  let earsToEnd = false;
-  // change layer order with t104
-  if (results[7]?.selectedElement?.name === 't104') {
-    const earsToEndHeads = [
-      't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
-      't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
-    const isEarsToEnd = earsToEndHeads.find((item) => {
-      return item === results[10]?.selectedElement?.name;
-    });
-
-    const cloneEars = JSON.parse(JSON.stringify(results[7]));
-    console.log('Changing order t104!');
-    if (isEarsToEnd) {
-      results[7] = null;
-      results.push(cloneEars);
-      earsToEnd = true;
-    } else {
-      results[7] = results[8];
-      results[8] = cloneEars;
-      earsToRight = true;
-    }
-  }
-
-  // change layer order with t103
-  if (results[7]) {
-    if (results[7].selectedElement?.name === 't103') {
-      console.log('Changing order t103!');
-      const cloneEars = JSON.parse(JSON.stringify(results[7]));
-      results[7] = results[6];
-      results[6] = cloneEars;
-    }
-  }
-
-  // повязки на глаза
-  const eyeWear = ['t86', 't89', 't90', 't94'];
-  if (eyeWear.find((item) => {
-    return item === results[8]?.selectedElement?.name;
-  })) {
-    const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
-    if (earsToRight) {
-      results[6] = results[7];
-      results[7] = cloneFaceMask;
-    }
-    if (earsToEnd) {
-      results[6] = results[8];
-      results[8] = cloneFaceMask;
-    } else {
-      results[6] = results[8];
-      results[8] = results[7];
-      results[7] = cloneFaceMask;
-    }
-  }
-
-  return results;
-};
+// const changeOrder = (results: Array<IDnaElement | null>) => {
+//   let earsToRight = false;
+//   let earsToEnd = false;
+//   // change layer order with t104
+//   if (results[7]?.selectedElement?.name === 't104') {
+//     const earsToEndHeads = [
+//       't120', 't121', 't122', 't125', 't126', 't127', 't128', 't129', 't133', 't134', 't135', 't136', 't138',
+//       't140', 't141', 't142', 't143', 't144', 't145', 't146', 't147', 't148', 't151', 't152', 't153', 't154'];
+//     const isEarsToEnd = earsToEndHeads.find((item) => {
+//       return item === results[10]?.selectedElement?.name;
+//     });
+//
+//     const cloneEars = JSON.parse(JSON.stringify(results[7]));
+//     console.log('Changing order t104!');
+//     if (isEarsToEnd) {
+//       results[7] = null;
+//       results.push(cloneEars);
+//       earsToEnd = true;
+//     } else {
+//       results[7] = results[8];
+//       results[8] = cloneEars;
+//       earsToRight = true;
+//     }
+//   }
+//
+//   // change layer order with t103
+//   if (results[7]) {
+//     if (results[7].selectedElement?.name === 't103') {
+//       console.log('Changing order t103!');
+//       const cloneEars = JSON.parse(JSON.stringify(results[7]));
+//       results[7] = results[6];
+//       results[6] = cloneEars;
+//     }
+//   }
+//
+//   // повязки на глаза
+//   const eyeWear = ['t86', 't89', 't90', 't94'];
+//   if (eyeWear.find((item) => {
+//     return item === results[8]?.selectedElement?.name;
+//   })) {
+//     const cloneFaceMask = JSON.parse(JSON.stringify(results[6]));
+//     if (earsToRight) {
+//       results[6] = results[7];
+//       results[7] = cloneFaceMask;
+//     }
+//     if (earsToEnd) {
+//       results[6] = results[8];
+//       results[8] = cloneFaceMask;
+//     } else {
+//       results[6] = results[8];
+//       results[8] = results[7];
+//       results[7] = cloneFaceMask;
+//     }
+//   }
+//
+//   return results;
+// };
 
 const getAbstractedIndexes = (): number[] => {
   let abstractedIndexes: number[] = [];
@@ -327,7 +299,8 @@ export const startCreating = async () => {
         });
 
         let loadedElements: Promise<IImage | null>[] = [];
-        // results = changeOrder(results);
+
+        results = changeOrder(results);
 
         results.forEach((dna) => {
           if (dna) {
@@ -348,6 +321,10 @@ export const startCreating = async () => {
             `Created edition: ${abstractedIndexes[0]}, with DNA: ${dnaHash}`,
           );
         });
+
+        if (abstractedIndexes[0] === 900) {
+          console.log('e');
+        }
 
         dnaHashList.add(dnaHash);
         editionCount++;
